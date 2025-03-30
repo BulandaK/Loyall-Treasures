@@ -1,37 +1,37 @@
 const { Model } = require("objection");
 
-class User extends Model {
+class Location extends Model {
   static get tableName() {
-    return "users";
+    return "locations";
   }
 
   static get idColumn() {
-    return "user_id";
+    return "location_id";
   }
 
   static get relationMappings() {
-    const UserRole = require("./UserRole");
+    const City = require("./City");
     const Discount = require("./Discount");
 
     return {
-      role: {
+      city: {
         relation: Model.BelongsToOneRelation,
-        modelClass: UserRole,
+        modelClass: City,
         join: {
-          from: "users.role_id",
-          to: "user_roles.role_id",
+          from: "locations.city_id",
+          to: "cities.city_id",
         },
       },
-      createdDiscounts: {
+      discounts: {
         relation: Model.HasManyRelation,
         modelClass: Discount,
         join: {
-          from: "users.user_id",
-          to: "discounts.created_by",
+          from: "locations.location_id",
+          to: "discounts.location_id",
         },
       },
     };
   }
 }
 
-module.exports = User;
+module.exports = Location;

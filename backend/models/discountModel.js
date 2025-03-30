@@ -1,42 +1,46 @@
-// Przykładowe dane zniżek (można zastąpić bazą danych)
-const discounts = [
-  { id: 1, store: "Sklep A", discount: "10%" },
-  { id: 2, store: "Sklep B", discount: "20%" },
-];
+import { Model } from "objection";
 
-// Pobranie zniżki po ID
-exports.getDiscountById = (id) => {
-  return discounts.find((discount) => discount.id === id);
-};
-
-// Pobranie wszystkich zniżek
-exports.getAllDiscounts = () => {
-  return discounts;
-};
-
-// Dodanie nowej zniżki
-exports.addDiscount = (discount) => {
-  const newDiscount = { id: discounts.length + 1, ...discount };
-  discounts.push(newDiscount);
-  return newDiscount;
-};
-
-// Aktualizacja zniżki
-exports.updateDiscount = (id, updatedData) => {
-  const discountIndex = discounts.findIndex((discount) => discount.id === id);
-  if (discountIndex !== -1) {
-    discounts[discountIndex] = { ...discounts[discountIndex], ...updatedData };
-    return discounts[discountIndex];
+class Discount extends Model {
+  static get tableName() {
+    return "discounts";
   }
-  return null;
-};
 
-// Usunięcie zniżki
-exports.deleteDiscount = (id) => {
-  const discountIndex = discounts.findIndex((discount) => discount.id === id);
-  if (discountIndex !== -1) {
-    const deletedDiscount = discounts.splice(discountIndex, 1);
-    return deletedDiscount[0];
+  static get idColumn() {
+    return "discount_id";
   }
-  return null;
-};
+
+  static get relationMappings() {
+    const Location = require("./Location");
+    const DiscountCategory = require("./DiscountCategory");
+    const User = require("./User");
+
+    return {
+      location: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: Location,
+        join: {
+          from: "discounts.location_id",
+          to: "locations.location_id",
+        },
+      },
+      category: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: DiscountCategory,
+        join: {
+          from: "discounts.category_id",
+          to: "discount_categories.category_id",
+        },
+      },
+      createdBy: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: User,
+        join: {
+          from: "discounts.created_by",
+          to: "users.user_id",
+        },
+      },
+    };
+  }
+}
+
+export default Discount;
