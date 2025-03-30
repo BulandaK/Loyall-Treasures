@@ -1,13 +1,14 @@
 const express = require("express");
 const app = express();
-const userRoutes = require("./routes/userRoutes");
-const discountRoutes = require("./routes/discountRoutes");
+const dbSetup = require("./db");
+const routes = require("./routes");
+
+dbSetup();
 
 app.use(express.json());
 
 // Dodajemy routing
-app.use("/api/users", userRoutes);
-app.use("/api/discounts", discountRoutes);
+app.use("/api", routes);
 
 // Obsługa błędów 404
 app.use((req, res, next) => {

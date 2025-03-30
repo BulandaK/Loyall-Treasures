@@ -3,11 +3,14 @@ const { Model } = require("objection");
 const knexConfig = require("./knexfile");
 
 // Inicjalizacja Knex.js
-const knex = Knex(knexConfig.development);
 
 // console.log("Knex instance initialized:", knex);
 
 // Powiązanie Objection.js z Knex.js
-Model.knex(knex);
 
-module.exports = knex;
+function setupDB() {
+  const knex = Knex(knexConfig.development);
+  Model.knex(knex);
+}
+
+module.exports = setupDB;
