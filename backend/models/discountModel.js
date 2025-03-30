@@ -1,4 +1,4 @@
-import { Model } from "objection";
+const { Model } = require("objection");
 
 class Discount extends Model {
   static get tableName() {
@@ -43,4 +43,4 @@ class Discount extends Model {
   }
 }
 
-export default Discount;
+module.exports = Discount;
