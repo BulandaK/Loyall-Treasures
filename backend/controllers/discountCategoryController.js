@@ -1,4 +1,4 @@
-const DiscountCategory = require("../models/DiscountCategory");
+const DiscountCategory = require("../models/discountCategoryModel");
 
 class DiscountCategoryController {
   // Pobierz wszystkie kategorie

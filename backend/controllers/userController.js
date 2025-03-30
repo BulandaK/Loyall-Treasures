@@ -1,4 +1,6 @@
-const User = require("../models/User");
+const User = require("../models/userModel");
+
+console.log("User model:", User);
 
 class UserController {
   // Pobierz wszystkich użytkowników
@@ -29,9 +31,11 @@ class UserController {
   // Dodaj nowego użytkownika
   static async createUser(req, res) {
     try {
+      console.log("Request body:", req.body);
       const newUser = await User.query().insert(req.body);
       res.status(201).json(newUser);
     } catch (error) {
+      console.error("Error creating user:", error);
       res.status(500).json({ message: "Error creating user", error });
     }
   }

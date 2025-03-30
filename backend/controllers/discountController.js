@@ -1,5 +1,4 @@
-// filepath: /Users/kamil/Desktop/ztpai/Loyall-Treasures/backend/controllers/DiscountController.js
-const Discount = require("../models/Discount");
+const Discount = require("../models/discountModel");
 
 class DiscountController {
   // Pobierz wszystkie zniżki

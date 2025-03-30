@@ -1,4 +1,4 @@
-const Location = require("../models/Location");
+const Location = require("../models/locationModel");
 
 class LocationController {
   // Pobierz wszystkie lokalizacje

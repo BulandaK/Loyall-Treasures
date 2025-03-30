@@ -1,4 +1,4 @@
-const UserFavorite = require("../models/UserFavorite");
+const UserFavorite = require("../models/userFavoriteModel");
 
 class UserFavoriteController {
   // Pobierz ulubione zniżki użytkownika

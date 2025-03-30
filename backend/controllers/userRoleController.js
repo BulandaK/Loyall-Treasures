@@ -1,4 +1,4 @@
-const UserRole = require("../models/UserRole");
+const UserRole = require("../models/userRoleModel");
 
 class UserRoleController {
   // Pobierz wszystkie role
