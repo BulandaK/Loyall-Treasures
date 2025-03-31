@@ -1,9 +1,19 @@
 const express = require("express");
+const cors = require("cors"); // Import pakietu cors
 const app = express();
 const dbSetup = require("./db");
 const routes = require("./routes");
 
 dbSetup();
+
+// Konfiguracja CORS
+app.use(
+  cors({
+    origin: "http://localhost:3000", // Adres frontendu
+    methods: ["GET", "POST", "PUT", "DELETE"], // Dozwolone metody
+    credentials: true, // Jeśli używasz ciasteczek lub uwierzytelniania
+  })
+);
 
 app.use(express.json());
 
