@@ -33,7 +33,7 @@ export default function SignupPage() {
         body: JSON.stringify({
           username: `${formData.firstName.toLowerCase()}_${formData.lastName.toLowerCase()}`,
           email: formData.email,
-          password_hash: formData.password, // Zakładamy, że backend obsługuje hashowanie
+          password: formData.password, // Przekazujemy hasło jako "password"
           first_name: formData.firstName,
           last_name: formData.lastName,
           role_id: 2, // Domyślna rola użytkownika

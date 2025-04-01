@@ -33,9 +33,30 @@ class UserController {
   // Dodaj nowego użytkownika
   static async createUser(req, res) {
     try {
-      console.log("Request body:", req.body);
-      const newUser = await User.query().insert(req.body);
-      res.status(201).json(newUser);
+      const { username, email, password, first_name, last_name, role_id } =
+        req.body;
+
+      // Sprawdź, czy wszystkie wymagane pola są podane
+      if (!email || !password || !first_name || !last_name) {
+        return res.status(400).json({ message: "All fields are required" });
+      }
+
+      // Hashuj hasło
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      // Zapisz użytkownika w bazie danych
+      const newUser = await User.query().insert({
+        username,
+        email,
+        password_hash: hashedPassword, // Zapisujemy zahashowane hasło
+        first_name,
+        last_name,
+        role_id,
+      });
+
+      res
+        .status(201)
+        .json({ message: "User created successfully", user: newUser });
     } catch (error) {
       console.error("Error creating user:", error);
       res.status(500).json({ message: "Error creating user", error });
@@ -49,18 +70,21 @@ class UserController {
       // Znajdź użytkownika po emailu
       const user = await User.query().findOne({ email });
       if (!user) {
-        return res.status(404).json({ message: "Invalid email or password" });
+        return res.status(404).json({ message: "Invalid email" });
       }
 
       // Sprawdź poprawność hasła
-      const isPasswordValid = await bcrypt.compare(password, user.password);
+      const isPasswordValid = await bcrypt.compare(
+        password,
+        user.password_hash
+      );
       if (!isPasswordValid) {
-        return res.status(401).json({ message: "Invalid email or password" });
+        return res.status(401).json({ message: "Invalid password" });
       }
 
       // Generuj token JWT
       const token = jwt.sign(
-        { id: user.id, email: user.email, role: user.role },
+        { id: user.user_id, email: user.email, role: user.role_id },
         process.env.JWT_SECRET,
         { expiresIn: "1h" }
       );
