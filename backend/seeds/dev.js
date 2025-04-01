@@ -1,3 +1,5 @@
+const bcrypt = require("bcrypt");
+
 /**
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
@@ -28,13 +30,17 @@ exports.seed = async function (knex) {
     },
   ]);
 
+  // Hashowanie haseł
+  const hashedPassword1 = await bcrypt.hash("adminpassword", 10);
+  const hashedPassword2 = await bcrypt.hash("testpassword", 10);
+
   // Dodanie danych do tabeli users
   await knex("users").insert([
     {
       user_id: 1,
       username: "admin",
       email: "admin@example.com",
-      password_hash: "hashedpassword1",
+      password_hash: hashedPassword1,
       first_name: "Admin",
       last_name: "User",
       role_id: 1,
@@ -46,7 +52,7 @@ exports.seed = async function (knex) {
       user_id: 2,
       username: "testuser",
       email: "testuser@example.com",
-      password_hash: "hashedpassword2",
+      password_hash: hashedPassword2,
       first_name: "Test",
       last_name: "User",
       role_id: 2,
