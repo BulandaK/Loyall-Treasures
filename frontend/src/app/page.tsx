@@ -1,100 +1,134 @@
+import CategoryCard from "@/components/CategoryCard";
 import Image from "next/image";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const categories = [
+    {
+      id: 1,
+      title: "Home Decor",
+      description: "Up to 70% off on select items",
+      image: "/homeDecor.png",
+      buttonText: "Shop Now",
+      buttonColor: "bg-[#FF784B]",
+    },
+    {
+      id: 2,
+      title: "Fashion",
+      description: "New arrivals at 50% off",
+      image: "/fashion.jpg",
+      buttonText: "Discover",
+      buttonColor: "bg-orange-500",
+    },
+    {
+      id: 3,
+      title: "Electronics",
+      description: "Save big on tech gadgets",
+      image: "/electronics.png",
+      buttonText: "Grab Deals",
+      buttonColor: "bg-orange-500",
+    },
+  ];
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  return (
+    <div className="min-h-screen bg-gray-100">
+      {/* Header */}
+      <header className="bg-white shadow-md">
+        <div className="container mx-auto px-6 py-4 flex justify-between items-center">
+          <h1 className="text-2xl font-bold text-green-600">Loyall</h1>
+          <nav className="flex space-x-6 justify-center items-center">
+            <a href="#" className="text-gray-700 hover:text-green-600">
+              Home
+            </a>
+            <a href="#" className="text-gray-700 hover:text-green-600">
+              Categories
+            </a>
+            <a href="#" className="text-gray-700 hover:text-green-600">
+              Notifications
+            </a>
+            <a href="#" className="text-gray-700 hover:text-green-600">
+              Contact Us
+            </a>
+            <button className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+              Login
+            </button>
+          </nav>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
+      </header>
+
+      {/* Hero Section */}
+      <section className="bg-white shadow-md mt-6 mx-6 rounded-lg p-6 flex items-center">
+        <Image
+          width={400}
+          height={200}
+          src="/bannerIcon.png"
+          alt="banner icon"
+        />
+        <div className="text-left pl-20">
+          <h2 className="text-3xl font-bold text-gray-800">
+            Exclusive Discounts Await!
+          </h2>
+          <p className="text-gray-600 mt-2">
+            Unlock massive savings on top brands across various categories. Join
+            our community today!
+          </p>
+          <button className="mt-4 bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700">
+            Explore Now
+          </button>
+        </div>
+      </section>
+
+      {/* Categories Section */}
+      <section className="container mx-auto px-6 py-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {categories.map((category) => (
+          <CategoryCard
+            key={category.id}
+            title={category.title}
+            description={category.description}
+            image={category.image}
+            buttonText={category.buttonText}
+            buttonColor={category.buttonColor}
           />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
+        ))}
+      </section>
+
+      {/* Subscribe Section */}
+      <section className="bg-gradient-to-r from-green-500 to-green-700 text-white mx-6 rounded-lg p-8 text-left shadow-lg">
+        <h3 className="text-3xl font-bold">Subscribe for Updates</h3>
+        <p className="text-lg mt-2">
+          Stay updated with the latest discounts and offers directly in your
+          inbox or via SMS.
+        </p>
+        <div className="mt-6 flex justify-center items-center">
+          <input
+            type="email"
+            placeholder="Enter your email"
+            className="border-none rounded-l-lg px-4 py-3 w-1/2 focus:outline-none focus:ring-2 focus:ring-green-300"
           />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+          <button className="bg-white text-green-600 font-bold px-6 py-3 rounded-r-lg hover:bg-gray-100 transition-all duration-300">
+            Subscribe
+          </button>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-gray-800 text-white py-6 mt-10">
+        <div className="container mx-auto px-6 text-center">
+          <div className="flex justify-center space-x-6 mb-4">
+            <a href="#" className="hover:underline">
+              About Us
+            </a>
+            <a href="#" className="hover:underline">
+              Terms of Service
+            </a>
+            <a href="#" className="hover:underline">
+              Privacy Policy
+            </a>
+            <a href="#" className="hover:underline">
+              Support
+            </a>
+          </div>
+          <p>© 2023 DiscountsNow. All rights reserved.</p>
+        </div>
       </footer>
     </div>
   );
