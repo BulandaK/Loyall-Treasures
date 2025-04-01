@@ -1,4 +1,6 @@
 const User = require("../models/userModel");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 
 console.log("User model:", User);
 
@@ -37,6 +39,36 @@ class UserController {
     } catch (error) {
       console.error("Error creating user:", error);
       res.status(500).json({ message: "Error creating user", error });
+    }
+  }
+
+  static async loginUser(req, res) {
+    try {
+      const { email, password } = req.body;
+
+      // Znajdź użytkownika po emailu
+      const user = await User.query().findOne({ email });
+      if (!user) {
+        return res.status(404).json({ message: "Invalid email or password" });
+      }
+
+      // Sprawdź poprawność hasła
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      if (!isPasswordValid) {
+        return res.status(401).json({ message: "Invalid email or password" });
+      }
+
+      // Generuj token JWT
+      const token = jwt.sign(
+        { id: user.id, email: user.email, role: user.role },
+        process.env.JWT_SECRET,
+        { expiresIn: "1h" }
+      );
+
+      res.status(200).json({ message: "Login successful", token });
+    } catch (error) {
+      console.error("Error logging in user:", error);
+      res.status(500).json({ message: "Error logging in user", error });
     }
   }
 
