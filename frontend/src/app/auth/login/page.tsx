@@ -1,12 +1,10 @@
 "use client";
 import React, { useState } from "react";
 import { AiOutlineGoogle } from "react-icons/ai"; // Import ikony Google
-import "./signup.css";
+import "./login.css";
 
-export default function SignupPage() {
+export default function LoginPage() {
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
     email: "",
     password: "",
   });
@@ -25,60 +23,37 @@ export default function SignupPage() {
     e.preventDefault();
 
     try {
-      const response = await fetch("http://localhost:8080/api/users", {
+      const response = await fetch("http://localhost:8080/api/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          username: `${formData.firstName.toLowerCase()}_${formData.lastName.toLowerCase()}`,
           email: formData.email,
-          password_hash: formData.password, // Zakładamy, że backend obsługuje hashowanie
-          first_name: formData.firstName,
-          last_name: formData.lastName,
-          role_id: 2, // Domyślna rola użytkownika
+          password: formData.password,
         }),
       });
 
       if (response.ok) {
-        setMessage("Account created successfully!");
+        setMessage("Login successful!");
         setIsSuccess(true); // Ustawiamy sukces na true
-        setFormData({ firstName: "", lastName: "", email: "", password: "" });
+        setFormData({ email: "", password: "" });
       } else {
         const errorData = await response.json();
         setMessage(`Error: ${errorData.message}`);
         setIsSuccess(false); // Ustawiamy sukces na false
       }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      setMessage("An error occurred while creating the account.");
+      setMessage("An error occurred while logging in.");
       setIsSuccess(false); // Ustawiamy sukces na false
     }
   };
 
   return (
     <div>
-      <h2 className="text-3xl font-bold mb-6">Create Account</h2>
+      <h2 className="text-3xl font-bold mb-6">Login</h2>
       <form className="w-full max-w-md space-y-4" onSubmit={handleSubmit}>
-        <div className="flex space-x-4">
-          <input
-            type="text"
-            name="firstName"
-            placeholder="First Name"
-            className="input-field"
-            value={formData.firstName}
-            onChange={handleChange}
-            required
-          />
-          <input
-            type="text"
-            name="lastName"
-            placeholder="Last Name"
-            className="input-field"
-            value={formData.lastName}
-            onChange={handleChange}
-            required
-          />
-        </div>
         <input
           type="email"
           name="email"
@@ -99,9 +74,9 @@ export default function SignupPage() {
         />
         <button
           type="submit"
-          className="w-full bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600"
+          className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
         >
-          Create Account
+          Login
         </button>
       </form>
       {message && (
@@ -116,7 +91,7 @@ export default function SignupPage() {
       <div className="flex space-x-4 mt-6">
         <button className="social-button bg-red-500 text-white flex items-center justify-center space-x-2">
           <AiOutlineGoogle size={20} /> {/* Ikona Google */}
-          <span>Sign up with Google</span>
+          <span>Login with Google</span>
         </button>
       </div>
     </div>
