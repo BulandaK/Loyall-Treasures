@@ -1,5 +1,6 @@
 import CategoryCard from "@/components/CategoryCard";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Home() {
   const categories = [
@@ -49,7 +50,7 @@ export default function Home() {
               Contact Us
             </a>
             <button className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-              Login
+              <Link href="/auth/login"> Login</Link>
             </button>
           </nav>
         </div>
