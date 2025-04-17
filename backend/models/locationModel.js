@@ -10,8 +10,8 @@ class Location extends Model {
   }
 
   static get relationMappings() {
-    const City = require("./City");
-    const Discount = require("./Discount");
+    const City = require("./cityModel");
+    const Discount = require("./discountModel");
 
     return {
       city: {

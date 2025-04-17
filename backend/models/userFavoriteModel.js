@@ -10,8 +10,8 @@ class UserFavorite extends Model {
   }
 
   static get relationMappings() {
-    const User = require("./User");
-    const Discount = require("./Discount");
+    const User = require("./userModel");
+    const Discount = require("./discountModel");
 
     return {
       user: {

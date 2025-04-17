@@ -10,7 +10,7 @@ class DiscountCategory extends Model {
   }
 
   static get relationMappings() {
-    const Discount = require("./Discount");
+    const Discount = require("./discountModel");
 
     return {
       discounts: {

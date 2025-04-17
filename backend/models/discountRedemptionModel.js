@@ -10,9 +10,9 @@ class DiscountRedemption extends Model {
   }
 
   static get relationMappings() {
-    const Discount = require("./Discount");
-    const User = require("./User");
-    const Location = require("./Location");
+    const Discount = require("./discountModel");
+    const User = require("./userModel");
+    const Location = require("./locationModel");
 
     return {
       discount: {

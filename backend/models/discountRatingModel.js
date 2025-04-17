@@ -10,8 +10,8 @@ class DiscountRating extends Model {
   }
 
   static get relationMappings() {
-    const Discount = require("./Discount");
-    const User = require("./User");
+    const Discount = require("./dicountModel");
+    const User = require("./userModel");
 
     return {
       discount: {

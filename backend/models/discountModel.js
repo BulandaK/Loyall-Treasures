@@ -10,9 +10,9 @@ class Discount extends Model {
   }
 
   static get relationMappings() {
-    const Location = require("./Location");
-    const DiscountCategory = require("./DiscountCategory");
-    const User = require("./User");
+    const Location = require("./locationModel");
+    const DiscountCategory = require("./discountCategoryModel");
+    const User = require("./userModel");
 
     return {
       location: {

@@ -10,7 +10,7 @@ class UserRole extends Model {
   }
 
   static get relationMappings() {
-    const User = require("./User");
+    const User = require("./userModel");
 
     return {
       users: {
