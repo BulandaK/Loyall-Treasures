@@ -7,7 +7,7 @@
     "make-seed": "npx knex seed:make dev",
     "migrate": "npx knex migrate:latest",
     "seed": "npx knex seed:run",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "set NODE_ENV=test&& jest",
     "start": "node server.js"
   },
   "keywords": [],
@@ -22,6 +22,11 @@
     "jsonwebtoken": "^9.0.2",
     "knex": "^3.1.0",
     "objection": "^3.1.5",
-    "pg": "^8.14.1"
+    "pg": "^8.14.1",
+    "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^7.1.0"
   }
 }

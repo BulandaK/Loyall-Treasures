@@ -15,4 +15,17 @@ module.exports = {
       directory: "./seeds",
     },
   },
+  test: {
+    client: "sqlite3", // Używamy SQLite dla testów
+    connection: {
+      filename: ":memory:", // Baza danych w pamięci
+    },
+    useNullAsDefault: true, // Wymagane dla SQLite
+    migrations: {
+      directory: "./migrations", // Używamy tych samych migracji
+    },
+    seeds: {
+      directory: "./seeds", // Opcjonalnie, jeśli chcesz załadować dane testowe
+    },
+  },
 };

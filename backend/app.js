@@ -20,7 +20,9 @@ app.use(express.json());
 
 // Dodajemy routing
 app.use("/api", routes);
-
+app.get("/", (req, res) => {
+  res.status(200).json({ message: "Hello, world!" });
+});
 // Obsługa błędów 404
 app.use((req, res, next) => {
   res.status(404).json({ message: "Not Found" });
