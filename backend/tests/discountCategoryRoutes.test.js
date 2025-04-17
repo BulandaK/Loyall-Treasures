@@ -1,29 +1,83 @@
-const knex = require("../db"); // Import instancji Knex z db.js
 const request = require("supertest");
 const app = require("../app");
+const setupDB = require("../db");
+const DiscountCategory = require("../models/discountCategoryModel");
+
+jest.mock("../models/discountCategoryModel");
+
+let knex;
 
 beforeAll(async () => {
-  await knex.migrate.latest(); // Uruchom migracje
+  process.env.NODE_ENV = "test"; // Ustawiamy środowisko na 'test'
+  knex = setupDB(); // Inicjalizujemy bazę danych dla testów
+  await knex.migrate.latest(); // Uruchamiamy migracje
 });
 
 afterAll(async () => {
-  await knex.destroy(); // Zamknij połączenie z bazą danych
+  await knex.destroy(); // Zamykamy połączenie z bazą danych
 });
 
-describe("Discount Category Routes", () => {
-  it("GET /api/categories - powinno zwrócić wszystkie kategorie", async () => {
-    const response = await request(app).get("/api/categories");
-    expect(response.status).toBe(200);
-    expect(Array.isArray(response.body)).toBe(true);
+describe("DiscountCategoryController", () => {
+  describe("getAllCategories", () => {
+    it("should return all categories", async () => {
+      const mockCategories = [
+        { id: 1, name: "Category 1" },
+        { id: 2, name: "Category 2" },
+      ];
+      DiscountCategory.query.mockResolvedValue(mockCategories);
+
+      const response = await request(app).get("/api/categories");
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual(mockCategories);
+      expect(Array.isArray(response.body)).toBe(true);
+    });
+
+    it("should handle errors when fetching categories", async () => {
+      DiscountCategory.query.mockRejectedValue(new Error("Database error"));
+
+      const response = await request(app).get("/api/categories");
+
+      expect(response.status).toBe(500);
+      expect(response.body).toHaveProperty(
+        "message",
+        "Error fetching categories"
+      );
+    });
   });
 
-  it("POST /api/categories - powinno dodać nową kategorię", async () => {
-    const newCategory = { name: "Test Category" };
-    const response = await request(app)
-      .post("/api/categories")
-      .send(newCategory);
-    expect(response.status).toBe(201);
-    expect(response.body).toHaveProperty("id");
-    expect(response.body.name).toBe(newCategory.name);
+  describe("createCategory", () => {
+    it("should create a new category", async () => {
+      const newCategory = { name: "Test Category" };
+      const mockInsertedCategory = { id: 1, name: "Test Category" };
+      DiscountCategory.query.mockReturnValue({
+        insert: jest.fn().mockResolvedValue(mockInsertedCategory),
+      });
+
+      const response = await request(app)
+        .post("/api/categories")
+        .send(newCategory);
+
+      expect(response.status).toBe(201);
+      expect(response.body).toEqual(mockInsertedCategory);
+      expect(response.body).toHaveProperty("id");
+      expect(response.body.name).toBe(newCategory.name);
+    });
+
+    it("should handle errors when creating a category", async () => {
+      DiscountCategory.query.mockReturnValue({
+        insert: jest.fn().mockRejectedValue(new Error("Database error")),
+      });
+
+      const response = await request(app)
+        .post("/api/categories")
+        .send({ name: "Test Category" });
+
+      expect(response.status).toBe(500);
+      expect(response.body).toHaveProperty(
+        "message",
+        "Error creating category"
+      );
+    });
   });
 });
