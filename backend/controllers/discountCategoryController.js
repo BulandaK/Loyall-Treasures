@@ -14,6 +14,11 @@ class DiscountCategoryController {
   // Dodaj nową kategorię
   static async createCategory(req, res) {
     try {
+      const { name } = req.body;
+      if (!name) {
+        return res.status(400).json({ message: "Name is required" });
+      }
+
       const newCategory = await DiscountCategory.query().insert(req.body);
       res.status(201).json(newCategory);
     } catch (error) {
