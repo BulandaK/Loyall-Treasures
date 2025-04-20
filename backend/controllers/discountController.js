@@ -1,65 +1,83 @@
-const DiscountDAO = require("../dao/discountDAO");
+const DiscountService = require("../services/discountService");
 
 class DiscountController {
   // Pobierz wszystkie zniżki
   static async getAllDiscounts(req, res) {
     try {
-      const discounts = await DiscountDAO.findAllWithRelations();
+      const discounts = await DiscountService.getAllDiscounts();
       res.status(200).json(discounts);
     } catch (error) {
-      res.status(500).json({ message: "Error fetching discounts", error });
+      res.status(500).json({
+        message: "Error fetching discounts",
+        error: error.message, // Szczegóły błędu
+      });
     }
   }
 
   // Pobierz zniżkę po ID
   static async getDiscountById(req, res) {
     try {
-      const discount = await DiscountDAO.findByIdWithRelations(req.params.id);
-      if (!discount) {
-        return res.status(404).json({ message: "Discount not found" });
-      }
+      const discount = await DiscountService.getDiscountById(req.params.id);
       res.status(200).json(discount);
     } catch (error) {
-      res.status(500).json({ message: "Error fetching discount", error });
+      if (error.message === "Discount not found") {
+        res.status(404).json({ message: error.message });
+      } else {
+        res.status(500).json({
+          message: "Error fetching discount",
+          error: error.message, // Szczegóły błędu
+        });
+      }
     }
   }
 
   // Dodaj nową zniżkę
   static async createDiscount(req, res) {
     try {
-      const newDiscount = await DiscountDAO.createDiscount(req.body);
+      const newDiscount = await DiscountService.createDiscount(req.body);
       res.status(201).json(newDiscount);
     } catch (error) {
-      res.status(500).json({ message: "Error creating discount", error });
+      res.status(500).json({
+        message: "Error creating discount",
+        error: error.message, // Szczegóły błędu
+      });
     }
   }
 
   // Zaktualizuj zniżkę
   static async updateDiscount(req, res) {
     try {
-      const updatedDiscount = await DiscountDAO.updateDiscount(
+      const updatedDiscount = await DiscountService.updateDiscount(
         req.params.id,
         req.body
       );
-      if (!updatedDiscount) {
-        return res.status(404).json({ message: "Discount not found" });
-      }
       res.status(200).json(updatedDiscount);
     } catch (error) {
-      res.status(500).json({ message: "Error updating discount", error });
+      if (error.message === "Discount not found") {
+        res.status(404).json({ message: error.message });
+      } else {
+        res.status(500).json({
+          message: "Error updating discount",
+          error: error.message, // Szczegóły błędu
+        });
+      }
     }
   }
 
   // Usuń zniżkę
   static async deleteDiscount(req, res) {
     try {
-      const rowsDeleted = await DiscountDAO.deleteDiscount(req.params.id);
-      if (!rowsDeleted) {
-        return res.status(404).json({ message: "Discount not found" });
-      }
+      await DiscountService.deleteDiscount(req.params.id);
       res.status(200).json({ message: "Discount deleted successfully" });
     } catch (error) {
-      res.status(500).json({ message: "Error deleting discount", error });
+      if (error.message === "Discount not found") {
+        res.status(404).json({ message: error.message });
+      } else {
+        res.status(500).json({
+          message: "Error deleting discount",
+          error: error.message, // Szczegóły błędu
+        });
+      }
     }
   }
 }
