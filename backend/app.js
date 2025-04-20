@@ -1,9 +1,13 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors"); // Import pakietu cors
-const app = express();
 const dbSetup = require("./db");
 const routes = require("./routes");
+
+const swaggerUi = require("swagger-ui-express");
+const swaggerSpecs = require("./swagger");
+
+const app = express();
 
 dbSetup();
 
@@ -19,7 +23,10 @@ app.use(
 app.use(express.json());
 
 // Dodajemy routing
+// Endpoint dokumentacji Swagger
+app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
 app.use("/api", routes);
+
 app.get("/", (req, res) => {
   res.status(200).json({ message: "Hello, world!" });
 });
