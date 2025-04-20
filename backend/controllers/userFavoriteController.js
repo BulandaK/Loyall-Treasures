@@ -1,12 +1,12 @@
-const UserFavorite = require("../models/userFavoriteModel");
+const UserFavoriteDAO = require("../dao/userFavoriteDAO");
 
 class UserFavoriteController {
   // Pobierz ulubione zniżki użytkownika
   static async getFavoritesByUser(req, res) {
     try {
-      const favorites = await UserFavorite.query()
-        .where("user_id", req.params.userId)
-        .withGraphFetched("discount");
+      const favorites = await UserFavoriteDAO.findFavoritesByUser(
+        req.params.userId
+      );
       res.status(200).json(favorites);
     } catch (error) {
       res.status(500).json({ message: "Error fetching favorites", error });
@@ -16,7 +16,7 @@ class UserFavoriteController {
   // Dodaj zniżkę do ulubionych
   static async addFavorite(req, res) {
     try {
-      const newFavorite = await UserFavorite.query().insert(req.body);
+      const newFavorite = await UserFavoriteDAO.addFavorite(req.body);
       res.status(201).json(newFavorite);
     } catch (error) {
       res.status(500).json({ message: "Error adding favorite", error });
@@ -26,10 +26,10 @@ class UserFavoriteController {
   // Usuń zniżkę z ulubionych
   static async removeFavorite(req, res) {
     try {
-      const rowsDeleted = await UserFavorite.query()
-        .delete()
-        .where("user_id", req.params.userId)
-        .andWhere("discount_id", req.params.discountId);
+      const rowsDeleted = await UserFavoriteDAO.removeFavorite(
+        req.params.userId,
+        req.params.discountId
+      );
       if (!rowsDeleted) {
         return res.status(404).json({ message: "Favorite not found" });
       }

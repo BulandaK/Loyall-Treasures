@@ -1,12 +1,10 @@
-const Discount = require("../models/discountModel");
+const DiscountDAO = require("../dao/discountDAO");
 
 class DiscountController {
   // Pobierz wszystkie zniżki
   static async getAllDiscounts(req, res) {
     try {
-      const discounts = await Discount.query().withGraphFetched(
-        "[location, category, createdBy]"
-      );
+      const discounts = await DiscountDAO.findAllWithRelations();
       res.status(200).json(discounts);
     } catch (error) {
       res.status(500).json({ message: "Error fetching discounts", error });
@@ -16,9 +14,7 @@ class DiscountController {
   // Pobierz zniżkę po ID
   static async getDiscountById(req, res) {
     try {
-      const discount = await Discount.query()
-        .findById(req.params.id)
-        .withGraphFetched("[location, category, createdBy]");
+      const discount = await DiscountDAO.findByIdWithRelations(req.params.id);
       if (!discount) {
         return res.status(404).json({ message: "Discount not found" });
       }
@@ -31,7 +27,7 @@ class DiscountController {
   // Dodaj nową zniżkę
   static async createDiscount(req, res) {
     try {
-      const newDiscount = await Discount.query().insert(req.body);
+      const newDiscount = await DiscountDAO.createDiscount(req.body);
       res.status(201).json(newDiscount);
     } catch (error) {
       res.status(500).json({ message: "Error creating discount", error });
@@ -41,7 +37,7 @@ class DiscountController {
   // Zaktualizuj zniżkę
   static async updateDiscount(req, res) {
     try {
-      const updatedDiscount = await Discount.query().patchAndFetchById(
+      const updatedDiscount = await DiscountDAO.updateDiscount(
         req.params.id,
         req.body
       );
@@ -57,7 +53,7 @@ class DiscountController {
   // Usuń zniżkę
   static async deleteDiscount(req, res) {
     try {
-      const rowsDeleted = await Discount.query().deleteById(req.params.id);
+      const rowsDeleted = await DiscountDAO.deleteDiscount(req.params.id);
       if (!rowsDeleted) {
         return res.status(404).json({ message: "Discount not found" });
       }
