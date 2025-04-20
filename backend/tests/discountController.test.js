@@ -1,225 +1,208 @@
 const request = require("supertest");
-const Discount = require("../models/discountModel");
-const DiscountController = require("../controllers/discountController");
+const app = require("../app");
+const setupDB = require("../db");
 
-jest.mock("../models/discountModel");
+let knex;
 
-describe("DiscountController", () => {
-  let mockRes;
+beforeAll(async () => {
+  process.env.NODE_ENV = "test"; // Ustawiamy środowisko na 'test'
+  knex = setupDB(); // Inicjalizujemy połączenie z bazą danych testową
+  await knex.migrate.latest(); // Uruchamiamy migracje
+  await knex.raw("PRAGMA foreign_keys = ON"); // Włączamy klucze obce dla SQLite3
+});
 
-  beforeEach(() => {
-    mockRes = {
-      status: jest.fn().mockReturnThis(),
-      json: jest.fn(),
-    };
-  });
+afterAll(async () => {
+  await knex.destroy(); // Zamykamy połączenie z bazą danych
+});
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
+beforeEach(async () => {
+  // Czyszczenie tabeli przed każdym testem
+  await knex.raw("DELETE FROM discounts");
+  await knex.raw("DELETE FROM sqlite_sequence WHERE name = 'discounts'");
+});
 
-  describe("getAllDiscounts", () => {
+describe("DiscountController (Integration Tests)", () => {
+  describe("GET /api/discounts", () => {
     it("should return all discounts with status 200", async () => {
-      const mockDiscounts = [{ id: 1, name: "Discount 1" }];
-      Discount.query.mockReturnValue({
-        withGraphFetched: jest.fn().mockResolvedValue(mockDiscounts),
-      });
+      // Wstaw dane testowe
+      await knex("discounts").insert([
+        { discount_id: 1, title: "Discount 1", description: "Description 1" },
+        { discount_id: 2, title: "Discount 2", description: "Description 2" },
+      ]);
 
-      const mockReq = {};
-      await DiscountController.getAllDiscounts(mockReq, mockRes);
+      // Wykonaj żądanie HTTP
+      const response = await request(app).get("/api/discounts");
 
-      expect(mockRes.status).toHaveBeenCalledWith(200);
-      expect(mockRes.json).toHaveBeenCalledWith(mockDiscounts);
+      // Sprawdź odpowiedź
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveLength(2);
+      expect(response.body).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            title: "Discount 1",
+            description: "Description 1",
+          }),
+          expect.objectContaining({
+            title: "Discount 2",
+            description: "Description 2",
+          }),
+        ])
+      );
     });
 
-    it("should handle errors and return status 500", async () => {
-      Discount.query.mockReturnValue({
-        withGraphFetched: jest
-          .fn()
-          .mockRejectedValue(new Error("Database error")),
-      });
+    it("should return an empty array if no discounts exist", async () => {
+      // Wykonaj żądanie HTTP bez danych w bazie
+      const response = await request(app).get("/api/discounts");
 
-      const mockReq = {};
-      await DiscountController.getAllDiscounts(mockReq, mockRes);
-
-      expect(mockRes.status).toHaveBeenCalledWith(500);
-      expect(mockRes.json).toHaveBeenCalledWith({
-        message: "Error fetching discounts",
-        error: expect.any(Error),
-      });
+      // Sprawdź odpowiedź
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual([]);
     });
   });
 
-  describe("getDiscountById", () => {
+  describe("GET /api/discounts/:id", () => {
     it("should return a discount by ID with status 200", async () => {
-      const mockDiscount = { id: 1, name: "Discount 1" };
-      Discount.query.mockReturnValue({
-        findById: jest.fn().mockReturnValue({
-          withGraphFetched: jest.fn().mockResolvedValue(mockDiscount),
-        }),
+      // Wstaw dane testowe
+      await knex("discounts").insert({
+        title: "Discount 1",
+        description: "Description 1",
       });
 
-      const mockReq = { params: { id: 1 } };
-      await DiscountController.getDiscountById(mockReq, mockRes);
+      // Wykonaj żądanie HTTP
+      const response = await request(app).get("/api/discounts/1");
 
-      expect(mockRes.status).toHaveBeenCalledWith(200);
-      expect(mockRes.json).toHaveBeenCalledWith(mockDiscount);
+      // Sprawdź odpowiedź
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual(
+        expect.objectContaining({
+          title: "Discount 1",
+          description: "Description 1",
+        })
+      );
     });
 
     it("should return 404 if discount is not found", async () => {
-      Discount.query.mockReturnValue({
-        findById: jest.fn().mockReturnValue({
-          withGraphFetched: jest.fn().mockResolvedValue(null),
-        }),
-      });
+      // Wykonaj żądanie HTTP dla nieistniejącego ID
+      const response = await request(app).get("/api/discounts/999");
 
-      const mockReq = { params: { id: 1 } };
-      await DiscountController.getDiscountById(mockReq, mockRes);
-
-      expect(mockRes.status).toHaveBeenCalledWith(404);
-      expect(mockRes.json).toHaveBeenCalledWith({
-        message: "Discount not found",
-      });
-    });
-
-    it("should handle errors and return status 500", async () => {
-      Discount.query.mockReturnValue({
-        findById: jest.fn().mockReturnValue({
-          withGraphFetched: jest
-            .fn()
-            .mockRejectedValue(new Error("Database error")),
-        }),
-      });
-
-      const mockReq = { params: { id: 1 } };
-      await DiscountController.getDiscountById(mockReq, mockRes);
-
-      expect(mockRes.status).toHaveBeenCalledWith(500);
-      expect(mockRes.json).toHaveBeenCalledWith({
-        message: "Error fetching discount",
-        error: expect.any(Error),
-      });
+      // Sprawdź odpowiedź
+      expect(response.status).toBe(404);
+      expect(response.body).toHaveProperty("message", "Discount not found");
     });
   });
 
-  describe("createDiscount", () => {
+  describe("POST /api/discounts", () => {
     it("should create a new discount and return it with status 201", async () => {
-      const mockDiscount = { id: 1, name: "New Discount" };
-      Discount.query.mockReturnValue({
-        insert: jest.fn().mockResolvedValue(mockDiscount),
-      });
+      const newDiscount = {
+        title: "New Discount",
+        description: "New Description",
+      };
 
-      const mockReq = { body: { name: "New Discount" } };
-      await DiscountController.createDiscount(mockReq, mockRes);
+      // Wykonaj żądanie HTTP
+      const response = await request(app)
+        .post("/api/discounts")
+        .send(newDiscount);
 
-      expect(mockRes.status).toHaveBeenCalledWith(201);
-      expect(mockRes.json).toHaveBeenCalledWith(mockDiscount);
+      // Sprawdź odpowiedź
+      expect(response.status).toBe(201);
+      expect(response.body).toHaveProperty("discount_id");
+      expect(response.body).toHaveProperty("title", "New Discount");
+      expect(response.body).toHaveProperty("description", "New Description");
+
+      // Sprawdź, czy dane zostały zapisane w bazie
+      const discountInDB = await knex("discounts")
+        .where({ discount_id: response.body.discount_id })
+        .first();
+      expect(discountInDB).toMatchObject(newDiscount);
     });
 
     it("should handle errors and return status 500", async () => {
-      Discount.query.mockReturnValue({
-        insert: jest.fn().mockRejectedValue(new Error("Database error")),
-      });
+      // Przykład błędu, np. brak wymaganych danych
+      const response = await request(app).post("/api/discounts").send({});
 
-      const mockReq = { body: { name: "New Discount" } };
-      await DiscountController.createDiscount(mockReq, mockRes);
-
-      expect(mockRes.status).toHaveBeenCalledWith(500);
-      expect(mockRes.json).toHaveBeenCalledWith({
-        message: "Error creating discount",
-        error: expect.any(Error),
-      });
+      // Sprawdź odpowiedź
+      expect(response.status).toBe(500);
+      expect(response.body).toHaveProperty(
+        "message",
+        "Error creating discount"
+      );
     });
   });
 
-  describe("updateDiscount", () => {
+  describe("PUT /api/discounts/:id", () => {
     it("should update a discount and return it with status 200", async () => {
-      const mockUpdatedDiscount = { id: 1, name: "Updated Discount" };
-      Discount.query.mockReturnValue({
-        patchAndFetchById: jest.fn().mockResolvedValue(mockUpdatedDiscount),
+      // Wstaw dane testowe
+      await knex("discounts").insert({
+        title: "Old Discount",
+        description: "Old Description",
       });
 
-      const mockReq = { params: { id: 1 }, body: { name: "Updated Discount" } };
-      await DiscountController.updateDiscount(mockReq, mockRes);
+      const updatedDiscount = {
+        title: "Updated Discount",
+        description: "Updated Description",
+      };
 
-      expect(mockRes.status).toHaveBeenCalledWith(200);
-      expect(mockRes.json).toHaveBeenCalledWith(mockUpdatedDiscount);
+      // Wykonaj żądanie HTTP
+      const response = await request(app)
+        .put("/api/discounts/1")
+        .send(updatedDiscount);
+
+      // Sprawdź odpowiedź
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty("title", "Updated Discount");
+      expect(response.body).toHaveProperty(
+        "description",
+        "Updated Description"
+      );
+
+      // Sprawdź, czy dane zostały zaktualizowane w bazie
+      const discountInDB = await knex("discounts")
+        .where({ discount_id: 1 })
+        .first();
+      expect(discountInDB).toMatchObject(updatedDiscount);
     });
 
     it("should return 404 if discount to update is not found", async () => {
-      Discount.query.mockReturnValue({
-        patchAndFetchById: jest.fn().mockResolvedValue(null),
-      });
+      const response = await request(app)
+        .put("/api/discounts/999")
+        .send({ title: "Updated Discount" });
 
-      const mockReq = { params: { id: 1 }, body: { name: "Updated Discount" } };
-      await DiscountController.updateDiscount(mockReq, mockRes);
-
-      expect(mockRes.status).toHaveBeenCalledWith(404);
-      expect(mockRes.json).toHaveBeenCalledWith({
-        message: "Discount not found",
-      });
-    });
-
-    it("should handle errors and return status 500", async () => {
-      Discount.query.mockReturnValue({
-        patchAndFetchById: jest
-          .fn()
-          .mockRejectedValue(new Error("Database error")),
-      });
-
-      const mockReq = { params: { id: 1 }, body: { name: "Updated Discount" } };
-      await DiscountController.updateDiscount(mockReq, mockRes);
-
-      expect(mockRes.status).toHaveBeenCalledWith(500);
-      expect(mockRes.json).toHaveBeenCalledWith({
-        message: "Error updating discount",
-        error: expect.any(Error),
-      });
+      // Sprawdź odpowiedź
+      expect(response.status).toBe(404);
+      expect(response.body).toHaveProperty("message", "Discount not found");
     });
   });
 
-  describe("deleteDiscount", () => {
+  describe("DELETE /api/discounts/:id", () => {
     it("should delete a discount and return status 200", async () => {
-      Discount.query.mockReturnValue({
-        deleteById: jest.fn().mockResolvedValue(1),
+      // Wstaw dane testowe
+      await knex("discounts").insert({
+        title: "Discount to delete",
       });
 
-      const mockReq = { params: { id: 1 } };
-      await DiscountController.deleteDiscount(mockReq, mockRes);
+      // Wykonaj żądanie HTTP
+      const response = await request(app).delete("/api/discounts/1");
 
-      expect(mockRes.status).toHaveBeenCalledWith(200);
-      expect(mockRes.json).toHaveBeenCalledWith({
-        message: "Discount deleted successfully",
-      });
+      // Sprawdź odpowiedź
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty(
+        "message",
+        "Discount deleted successfully"
+      );
+
+      // Sprawdź, czy dane zostały usunięte z bazy
+      const discountInDB = await knex("discounts")
+        .where({ discount_id: 1 })
+        .first();
+      expect(discountInDB).toBeUndefined();
     });
 
     it("should return 404 if discount to delete is not found", async () => {
-      Discount.query.mockReturnValue({
-        deleteById: jest.fn().mockResolvedValue(0),
-      });
+      const response = await request(app).delete("/api/discounts/999");
 
-      const mockReq = { params: { id: 1 } };
-      await DiscountController.deleteDiscount(mockReq, mockRes);
-
-      expect(mockRes.status).toHaveBeenCalledWith(404);
-      expect(mockRes.json).toHaveBeenCalledWith({
-        message: "Discount not found",
-      });
-    });
-
-    it("should handle errors and return status 500", async () => {
-      Discount.query.mockReturnValue({
-        deleteById: jest.fn().mockRejectedValue(new Error("Database error")),
-      });
-
-      const mockReq = { params: { id: 1 } };
-      await DiscountController.deleteDiscount(mockReq, mockRes);
-
-      expect(mockRes.status).toHaveBeenCalledWith(500);
-      expect(mockRes.json).toHaveBeenCalledWith({
-        message: "Error deleting discount",
-        error: expect.any(Error),
-      });
+      // Sprawdź odpowiedź
+      expect(response.status).toBe(404);
+      expect(response.body).toHaveProperty("message", "Discount not found");
     });
   });
 });
