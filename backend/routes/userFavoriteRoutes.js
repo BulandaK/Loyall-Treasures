@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const userFavoriteController = require("../controllers/userFavoriteController");
+const authMiddleware = require("../middleware/authMiddleware");
 
 /**
  * @swagger
@@ -38,7 +39,11 @@ const userFavoriteController = require("../controllers/userFavoriteController");
  *                     format: date-time
  *                     example: "2025-04-20T14:38:06.000Z"
  */
-router.get("/users/:userId", userFavoriteController.getFavoritesByUser);
+router.get(
+  "/users/:userId",
+  authMiddleware,
+  userFavoriteController.getFavoritesByUser
+);
 
 /**
  * @swagger
@@ -82,7 +87,7 @@ router.get("/users/:userId", userFavoriteController.getFavoritesByUser);
  *       400:
  *         description: Nieprawidłowe dane wejściowe
  */
-router.post("/", userFavoriteController.addFavorite);
+router.post("/", authMiddleware, userFavoriteController.addFavorite);
 
 /**
  * @swagger
@@ -110,6 +115,7 @@ router.post("/", userFavoriteController.addFavorite);
  */
 router.delete(
   "/users/:userId/:discountId",
+  authMiddleware,
   userFavoriteController.removeFavorite
 );
 

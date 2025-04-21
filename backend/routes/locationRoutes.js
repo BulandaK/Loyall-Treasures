@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const locationController = require("../controllers/locationController");
+const authMiddleware = require("../middleware/authMiddleware");
+const adminMiddleware = require("../middleware/adminMiddleware");
 
 /**
  * @swagger
@@ -27,7 +29,12 @@ const locationController = require("../controllers/locationController");
  *                     type: string
  *                     example: "123 Main Street"
  */
-router.get("/", locationController.getAllLocations);
+router.get(
+  "/",
+  authMiddleware,
+  adminMiddleware,
+  locationController.getAllLocations
+);
 
 /**
  * @swagger
@@ -61,7 +68,12 @@ router.get("/", locationController.getAllLocations);
  *       404:
  *         description: Lokalizacja nie znaleziona
  */
-router.get("/:id", locationController.getLocationById);
+router.get(
+  "/:id",
+  authMiddleware,
+  adminMiddleware,
+  locationController.getLocationById
+);
 
 /**
  * @swagger
@@ -87,7 +99,12 @@ router.get("/:id", locationController.getLocationById);
  *       400:
  *         description: Nieprawidłowe dane wejściowe
  */
-router.post("/", locationController.createLocation);
+router.post(
+  "/",
+  authMiddleware,
+  adminMiddleware,
+  locationController.createLocation
+);
 
 /**
  * @swagger
@@ -120,7 +137,12 @@ router.post("/", locationController.createLocation);
  *       404:
  *         description: Lokalizacja nie znaleziona
  */
-router.put("/:id", locationController.updateLocation);
+router.put(
+  "/:id",
+  authMiddleware,
+  adminMiddleware,
+  locationController.updateLocation
+);
 
 /**
  * @swagger
@@ -140,6 +162,11 @@ router.put("/:id", locationController.updateLocation);
  *       404:
  *         description: Lokalizacja nie znaleziona
  */
-router.delete("/:id", locationController.deleteLocation);
+router.delete(
+  "/:id",
+  authMiddleware,
+  adminMiddleware,
+  locationController.deleteLocation
+);
 
 module.exports = router;

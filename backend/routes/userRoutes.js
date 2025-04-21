@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const userController = require("../controllers/userController");
+const authMiddleware = require("../middleware/authMiddleware");
+const adminMiddleware = require("../middleware/adminMiddleware");
 
 /**
  * @swagger
@@ -27,7 +29,7 @@ const userController = require("../controllers/userController");
  *                     type: string
  *                     example: johndoe@example.com
  */
-router.get("/", userController.getAllUsers);
+router.get("/", authMiddleware, adminMiddleware, userController.getAllUsers);
 
 /**
  * @swagger
@@ -61,7 +63,7 @@ router.get("/", userController.getAllUsers);
  *       404:
  *         description: Użytkownik nie znaleziony
  */
-router.get("/:id", userController.getUserById);
+router.get("/:id", authMiddleware, adminMiddleware, userController.getUserById);
 
 /**
  * @swagger
@@ -174,7 +176,7 @@ router.post("/login", userController.loginUser);
  *       404:
  *         description: Użytkownik nie znaleziony
  */
-router.put("/:id", userController.updateUser);
+router.put("/:id", authMiddleware, userController.updateUser);
 
 /**
  * @swagger
@@ -194,6 +196,11 @@ router.put("/:id", userController.updateUser);
  *       404:
  *         description: Użytkownik nie znaleziony
  */
-router.delete("/:id", userController.deleteUser);
+router.delete(
+  "/:id",
+  authMiddleware,
+  adminMiddleware,
+  userController.deleteUser
+);
 
 module.exports = router;

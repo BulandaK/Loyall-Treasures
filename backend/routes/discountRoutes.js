@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const discountController = require("../controllers/discountController");
+const authMiddleware = require("../middleware/authMiddleware");
+const adminMiddleware = require("../middleware/adminMiddleware");
 
 /**
  * @swagger
@@ -153,7 +155,12 @@ router.get("/:id", discountController.getDiscountById);
  *       400:
  *         description: Nieprawidłowe dane wejściowe
  */
-router.post("/", discountController.createDiscount);
+router.post(
+  "/",
+  authMiddleware,
+  adminMiddleware,
+  discountController.createDiscount
+);
 
 /**
  * @swagger
@@ -208,7 +215,12 @@ router.post("/", discountController.createDiscount);
  *       404:
  *         description: Zniżka nie znaleziona
  */
-router.put("/:id", discountController.updateDiscount);
+router.put(
+  "/:id",
+  authMiddleware,
+  adminMiddleware,
+  discountController.updateDiscount
+);
 
 /**
  * @swagger
@@ -228,6 +240,11 @@ router.put("/:id", discountController.updateDiscount);
  *       404:
  *         description: Zniżka nie znaleziona
  */
-router.delete("/:id", discountController.deleteDiscount);
+router.delete(
+  "/:id",
+  authMiddleware,
+  adminMiddleware,
+  discountController.deleteDiscount
+);
 
 module.exports = router;

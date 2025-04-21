@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const discountCategoryController = require("../controllers/discountCategoryController");
+const authMiddleware = require("../middleware/authMiddleware");
+const adminMiddleware = require("../middleware/adminMiddleware");
 
 /**
  * @swagger
@@ -58,6 +60,11 @@ router.get("/", discountCategoryController.getAllCategories);
  *       400:
  *         description: Nieprawidłowe dane wejściowe
  */
-router.post("/", discountCategoryController.createCategory);
+router.post(
+  "/",
+  authMiddleware,
+  adminMiddleware,
+  discountCategoryController.createCategory
+);
 
 module.exports = router;

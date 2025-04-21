@@ -57,12 +57,18 @@ class UserService {
       error.statusCode = 401; // Dodajemy kod statusu do błędu
       throw error;
     }
+    console.log("Token payload:", {
+      id: user.user_id,
+      email: user.email,
+      role_id: user.role_id,
+    });
 
     const token = jwt.sign(
-      { id: user.user_id, email: user.email, role: user.role_id },
+      { id: user.user_id, email: user.email, role_id: user.role_id },
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
+    console.log("Generated token:", token); // Debugging line
 
     return { token };
   }

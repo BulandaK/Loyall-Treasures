@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const userRoleController = require("../controllers/userRoleController");
+const authMiddleware = require("../middleware/authMiddleware");
+const adminMiddleware = require("../middleware/adminMiddleware");
 
 /**
  * @swagger
@@ -47,6 +49,11 @@ router.get("/", userRoleController.getAllRoles);
  *       400:
  *         description: Nieprawidłowe dane wejściowe
  */
-router.post("/", userRoleController.createRole);
+router.post(
+  "/",
+  authMiddleware,
+  adminMiddleware,
+  userRoleController.createRole
+);
 
 module.exports = router;
