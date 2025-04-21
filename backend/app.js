@@ -6,6 +6,7 @@ const routes = require("./routes");
 
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpecs = require("./swagger");
+const passport = require("./passport");
 
 const app = express();
 
@@ -21,6 +22,7 @@ app.use(
 );
 
 app.use(express.json());
+app.use(passport.initialize());
 
 // Dodajemy routing
 // Endpoint dokumentacji Swagger
