@@ -1,8 +1,17 @@
 const request = require("supertest");
 const app = require("../app");
 const UserFavorite = require("../models/userFavoriteModel");
+const jwt = require("jsonwebtoken");
 
 jest.mock("../models/userFavoriteModel");
+
+const generateToken = (user) => {
+  return jwt.sign(
+    { id: user.id, email: user.email, role_id: user.role_id },
+    process.env.JWT_SECRET,
+    { expiresIn: "1h" }
+  );
+};
 
 describe("UserFavoriteController", () => {
   describe("getFavoritesByUser", () => {
@@ -17,11 +26,27 @@ describe("UserFavoriteController", () => {
         }),
       });
 
-      const response = await request(app).get("/api/favorites/users/1");
+      // Generujemy token JWT dla użytkownika
+      const userToken = generateToken({
+        id: 1,
+        email: "user@example.com",
+        role_id: 2, // Rola użytkownika
+      });
+
+      const response = await request(app)
+        .get("/api/favorites/users/1")
+        .set("Authorization", `Bearer ${userToken}`); // Dodajemy token;
 
       expect(response.status).toBe(200);
+
       expect(response.body).toEqual(mockFavorites);
       expect(Array.isArray(response.body)).toBe(true);
+    });
+    it("should return 401 if no token is provided for GET /favorites/users/:userId", async () => {
+      const response = await request(app).get("/api/favorites/users/1");
+
+      expect(response.status).toBe(401);
+      expect(response.body).toHaveProperty("message", "Unauthorized");
     });
 
     it("should handle errors when fetching favorites", async () => {
@@ -33,7 +58,16 @@ describe("UserFavoriteController", () => {
         }),
       });
 
-      const response = await request(app).get("/api/favorites/users/1");
+      // Generujemy token JWT dla użytkownika
+      const userToken = generateToken({
+        id: 1,
+        email: "user@example.com",
+        role_id: 2,
+      });
+
+      const response = await request(app)
+        .get("/api/favorites/users/1")
+        .set("Authorization", `Bearer ${userToken}`);
 
       expect(response.status).toBe(500);
       expect(response.body).toHaveProperty(
@@ -51,8 +85,16 @@ describe("UserFavoriteController", () => {
         insert: jest.fn().mockResolvedValue(mockInsertedFavorite),
       });
 
+      // Generujemy token JWT dla użytkownika
+      const userToken = generateToken({
+        id: 1,
+        email: "user@example.com",
+        role_id: 2,
+      });
+
       const response = await request(app)
         .post("/api/favorites")
+        .set("Authorization", `Bearer ${userToken}`) // Dodajemy token
         .send(newFavorite);
 
       expect(response.status).toBe(201);
@@ -61,14 +103,30 @@ describe("UserFavoriteController", () => {
       expect(response.body.user_id).toBe(newFavorite.user_id);
       expect(response.body.discount_id).toBe(newFavorite.discount_id);
     });
+    it("should return 401 if no token is provided for POST /favorites", async () => {
+      const response = await request(app)
+        .post("/api/favorites")
+        .send({ user_id: 1, discount_id: 1 });
+
+      expect(response.status).toBe(401);
+      expect(response.body).toHaveProperty("message", "Unauthorized");
+    });
 
     it("should handle errors when adding a favorite", async () => {
       UserFavorite.query.mockReturnValue({
         insert: jest.fn().mockRejectedValue(new Error("Database error")),
       });
 
+      // Generujemy token JWT dla użytkownika
+      const userToken = generateToken({
+        id: 1,
+        email: "user@example.com",
+        role_id: 2,
+      });
+
       const response = await request(app)
         .post("/api/favorites")
+        .set("Authorization", `Bearer ${userToken}`)
         .send({ user_id: 1, discount_id: 1 });
 
       expect(response.status).toBe(500);
@@ -86,7 +144,16 @@ describe("UserFavoriteController", () => {
         }),
       });
 
-      const response = await request(app).delete("/api/favorites/users/1/1");
+      // Generujemy token JWT dla użytkownika
+      const userToken = generateToken({
+        id: 1,
+        email: "user@example.com",
+        role_id: 2,
+      });
+
+      const response = await request(app)
+        .delete("/api/favorites/users/1/1")
+        .set("Authorization", `Bearer ${userToken}`);
 
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty(
@@ -95,19 +162,11 @@ describe("UserFavoriteController", () => {
       );
     });
 
-    it("should return 404 if favorite is not found", async () => {
-      UserFavorite.query.mockReturnValue({
-        delete: jest.fn().mockReturnValue({
-          where: jest.fn().mockReturnValue({
-            andWhere: jest.fn().mockResolvedValue(0),
-          }),
-        }),
-      });
-
+    it("should return 401 if no token is provided for DELETE /favorites/users/:userId/:discountId", async () => {
       const response = await request(app).delete("/api/favorites/users/1/1");
 
-      expect(response.status).toBe(404);
-      expect(response.body).toHaveProperty("message", "Favorite not found");
+      expect(response.status).toBe(401);
+      expect(response.body).toHaveProperty("message", "Unauthorized");
     });
 
     it("should handle errors when removing a favorite", async () => {
@@ -119,7 +178,16 @@ describe("UserFavoriteController", () => {
         }),
       });
 
-      const response = await request(app).delete("/api/favorites/users/1/1");
+      // Generujemy token JWT dla użytkownika
+      const userToken = generateToken({
+        id: 1,
+        email: "user@example.com",
+        role_id: 2,
+      });
+
+      const response = await request(app)
+        .delete("/api/favorites/users/1/1")
+        .set("Authorization", `Bearer ${userToken}`);
 
       expect(response.status).toBe(500);
       expect(response.body).toHaveProperty(

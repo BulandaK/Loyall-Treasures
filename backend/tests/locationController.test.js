@@ -1,8 +1,22 @@
 const request = require("supertest");
 const app = require("../app");
 const Location = require("../models/locationModel");
-
+const jwt = require("jsonwebtoken");
 jest.mock("../models/locationModel");
+
+const generateToken = (user) => {
+  return jwt.sign(
+    { id: user.id, email: user.email, role_id: user.role_id },
+    process.env.JWT_SECRET,
+    { expiresIn: "1h" }
+  );
+};
+
+const adminToken = generateToken({
+  id: 1,
+  email: "admin@example.com",
+  role_id: 1, // Rola admina
+});
 
 describe("LocationController", () => {
   describe("getAllLocations", () => {
@@ -15,11 +29,21 @@ describe("LocationController", () => {
         withGraphFetched: jest.fn().mockResolvedValue(mockLocations),
       });
 
-      const response = await request(app).get("/api/locations");
+      // Generujemy token JWT dla admina
+
+      const response = await request(app)
+        .get("/api/locations")
+        .set("Authorization", `Bearer ${adminToken}`); // Dodajemy token
 
       expect(response.status).toBe(200);
       expect(response.body).toEqual(mockLocations);
       expect(Array.isArray(response.body)).toBe(true);
+    });
+    it("should return 401 if no token is provided for GET /locations", async () => {
+      const response = await request(app).get("/api/locations");
+
+      expect(response.status).toBe(401);
+      expect(response.body).toHaveProperty("message", "Unauthorized");
     });
 
     it("should handle errors when fetching locations", async () => {
@@ -29,7 +53,9 @@ describe("LocationController", () => {
           .mockRejectedValue(new Error("Database error")),
       });
 
-      const response = await request(app).get("/api/locations");
+      const response = await request(app)
+        .get("/api/locations")
+        .set("Authorization", `Bearer ${adminToken}`);
 
       expect(response.status).toBe(500);
       expect(response.body).toHaveProperty(
@@ -48,7 +74,9 @@ describe("LocationController", () => {
         }),
       });
 
-      const response = await request(app).get("/api/locations/1");
+      const response = await request(app)
+        .get("/api/locations/1")
+        .set("Authorization", `Bearer ${adminToken}`);
 
       expect(response.status).toBe(200);
       expect(response.body).toEqual(mockLocation);
@@ -61,7 +89,9 @@ describe("LocationController", () => {
         }),
       });
 
-      const response = await request(app).get("/api/locations/1");
+      const response = await request(app)
+        .get("/api/locations/1")
+        .set("Authorization", `Bearer ${adminToken}`);
 
       expect(response.status).toBe(404);
       expect(response.body).toHaveProperty("message", "Location not found");
@@ -76,7 +106,9 @@ describe("LocationController", () => {
         }),
       });
 
-      const response = await request(app).get("/api/locations/1");
+      const response = await request(app)
+        .get("/api/locations/1")
+        .set("Authorization", `Bearer ${adminToken}`);
 
       expect(response.status).toBe(500);
       expect(response.body).toHaveProperty(
@@ -96,6 +128,7 @@ describe("LocationController", () => {
 
       const response = await request(app)
         .post("/api/locations")
+        .set("Authorization", `Bearer ${adminToken}`)
         .send(newLocation);
 
       expect(response.status).toBe(201);
@@ -111,6 +144,7 @@ describe("LocationController", () => {
 
       const response = await request(app)
         .post("/api/locations")
+        .set("Authorization", `Bearer ${adminToken}`)
         .send({ name: "Test Location" });
 
       expect(response.status).toBe(500);
@@ -130,6 +164,7 @@ describe("LocationController", () => {
 
       const response = await request(app)
         .put("/api/locations/1")
+        .set("Authorization", `Bearer ${adminToken}`)
         .send({ name: "Updated Location" });
 
       expect(response.status).toBe(200);
@@ -143,6 +178,7 @@ describe("LocationController", () => {
 
       const response = await request(app)
         .put("/api/locations/1")
+        .set("Authorization", `Bearer ${adminToken}`)
         .send({ name: "Updated Location" });
 
       expect(response.status).toBe(404);
@@ -158,6 +194,7 @@ describe("LocationController", () => {
 
       const response = await request(app)
         .put("/api/locations/1")
+        .set("Authorization", `Bearer ${adminToken}`)
         .send({ name: "Updated Location" });
 
       expect(response.status).toBe(500);
@@ -174,7 +211,9 @@ describe("LocationController", () => {
         deleteById: jest.fn().mockResolvedValue(1),
       });
 
-      const response = await request(app).delete("/api/locations/1");
+      const response = await request(app)
+        .delete("/api/locations/1")
+        .set("Authorization", `Bearer ${adminToken}`);
 
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty(
@@ -188,7 +227,9 @@ describe("LocationController", () => {
         deleteById: jest.fn().mockResolvedValue(0),
       });
 
-      const response = await request(app).delete("/api/locations/1");
+      const response = await request(app)
+        .delete("/api/locations/1")
+        .set("Authorization", `Bearer ${adminToken}`);
 
       expect(response.status).toBe(404);
       expect(response.body).toHaveProperty("message", "Location not found");
@@ -199,7 +240,9 @@ describe("LocationController", () => {
         deleteById: jest.fn().mockRejectedValue(new Error("Database error")),
       });
 
-      const response = await request(app).delete("/api/locations/1");
+      const response = await request(app)
+        .delete("/api/locations/1")
+        .set("Authorization", `Bearer ${adminToken}`);
 
       expect(response.status).toBe(500);
       expect(response.body).toHaveProperty(

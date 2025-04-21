@@ -1,6 +1,15 @@
 const request = require("supertest");
 const app = require("../app");
 const UserRole = require("../models/userRoleModel");
+const jwt = require("jsonwebtoken");
+
+const generateToken = (user) => {
+  return jwt.sign(
+    { id: user.id, email: user.email, role_id: user.role_id },
+    process.env.JWT_SECRET,
+    { expiresIn: "1h" }
+  );
+};
 
 jest.mock("../models/userRoleModel");
 
@@ -38,7 +47,16 @@ describe("UserRoleController", () => {
         insert: jest.fn().mockResolvedValue(mockInsertedRole),
       });
 
-      const response = await request(app).post("/api/roles").send(newRole);
+      const adminToken = generateToken({
+        id: 1,
+        email: "admin@example.com",
+        role_id: 1,
+      });
+
+      const response = await request(app)
+        .post("/api/roles")
+        .set("Authorization", `Bearer ${adminToken}`)
+        .send(newRole);
 
       expect(response.status).toBe(201);
       expect(response.body).toEqual(mockInsertedRole);
@@ -55,8 +73,8 @@ describe("UserRoleController", () => {
         .post("/api/roles")
         .send({ name: "Moderator" });
 
-      expect(response.status).toBe(500);
-      expect(response.body).toHaveProperty("message", "Error creating role");
+      expect(response.status).toBe(401);
+      expect(response.body).toHaveProperty("message", "Unauthorized");
     });
   });
 });

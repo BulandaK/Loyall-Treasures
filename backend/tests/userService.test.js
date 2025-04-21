@@ -147,7 +147,11 @@ describe("UserService", () => {
         mockUser.password_hash
       );
       expect(jwt.sign).toHaveBeenCalledWith(
-        { id: mockUser.user_id, email: mockUser.email, role: mockUser.role_id },
+        {
+          id: mockUser.user_id,
+          email: mockUser.email,
+          role_id: mockUser.role_id,
+        },
         process.env.JWT_SECRET,
         { expiresIn: "1h" }
       );

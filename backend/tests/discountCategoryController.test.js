@@ -1,6 +1,7 @@
 const request = require("supertest");
 const app = require("../app");
 const setupDB = require("../db");
+const jwt = require("jsonwebtoken");
 
 let knex;
 
@@ -18,6 +19,19 @@ afterAll(async () => {
 beforeEach(async () => {
   // Czyszczenie tabeli przed każdym testem
   await knex("discount_categories").truncate();
+});
+
+const generateToken = (user) => {
+  return jwt.sign(
+    { id: user.id, email: user.email, role_id: user.role_id },
+    process.env.JWT_SECRET,
+    { expiresIn: "1h" }
+  );
+};
+const adminToken = generateToken({
+  id: 1,
+  email: "admin@example.com",
+  role_id: 1, // Rola admina
 });
 
 describe("DiscountCategoryController", () => {
@@ -45,7 +59,9 @@ describe("DiscountCategoryController", () => {
 
     it("should return an empty array if no categories exist", async () => {
       // Wykonujemy żądanie HTTP bez danych w bazie
-      const response = await request(app).get("/api/categories");
+      const response = await request(app)
+        .get("/api/categories")
+        .set("Authorization", `Bearer ${adminToken}`);
 
       // Sprawdzamy odpowiedź
       expect(response.status).toBe(200);
@@ -63,6 +79,7 @@ describe("DiscountCategoryController", () => {
       // Wykonujemy żądanie HTTP
       const response = await request(app)
         .post("/api/categories")
+        .set("Authorization", `Bearer ${adminToken}`)
         .send(newCategory);
 
       // Sprawdzamy odpowiedź
@@ -79,7 +96,10 @@ describe("DiscountCategoryController", () => {
 
     it("should return 400 if required fields are missing", async () => {
       // Wykonujemy żądanie HTTP bez wymaganych pól
-      const response = await request(app).post("/api/categories").send({});
+      const response = await request(app)
+        .post("/api/categories")
+        .set("Authorization", `Bearer ${adminToken}`)
+        .send({});
 
       // Sprawdzamy odpowiedź
       expect(response.status).toBe(400);

@@ -1,8 +1,18 @@
 const request = require("supertest");
 const app = require("../app");
 const setupDB = require("../db");
+const jwt = require("jsonwebtoken");
 
 let knex;
+
+// Funkcja pomocnicza do generowania tokenów JWT
+const generateToken = (user) => {
+  return jwt.sign(
+    { id: user.user_id, email: user.email, role_id: user.role_id }, // Payload
+    process.env.JWT_SECRET, // Klucz JWT
+    { expiresIn: "1h" } // Czas wygaśnięcia
+  );
+};
 
 beforeAll(async () => {
   process.env.NODE_ENV = "test"; // Ustawiamy środowisko na 'test'
@@ -49,9 +59,15 @@ describe("UserController", () => {
           role_id: 2,
         },
       ]);
-
+      const adminToken = generateToken({
+        user_id: 1,
+        email: "user1@example.com",
+        role_id: 1,
+      });
       // Wykonujemy żądanie HTTP
-      const response = await request(app).get("/api/users");
+      const response = await request(app)
+        .get("/api/users")
+        .set("Authorization", `Bearer ${adminToken}`);
 
       // Sprawdzamy odpowiedź
       expect(response.status).toBe(200);
@@ -83,8 +99,17 @@ describe("UserController", () => {
         .returning("user_id");
       const userId = insertedUser[0]?.user_id || insertedUser[0];
 
+      // Generujemy token JWT dla admina
+      const adminToken = generateToken({
+        user_id: userId,
+        email: "user1@example.com",
+        role_id: 1,
+      });
+
       // Wykonujemy żądanie HTTP
-      const response = await request(app).get(`/api/users/${userId}`);
+      const response = await request(app)
+        .get(`/api/users/${userId}`)
+        .set("Authorization", `Bearer ${adminToken}`);
 
       // Sprawdzamy odpowiedź
       expect(response.status).toBe(200);
@@ -92,7 +117,15 @@ describe("UserController", () => {
     });
 
     it("should return 404 if user is not found", async () => {
-      const response = await request(app).get("/api/users/999");
+      const adminToken = generateToken({
+        user_id: 1,
+        email: "user1@example.com",
+        role_id: 1,
+      });
+
+      const response = await request(app)
+        .get("/api/users/999")
+        .set("Authorization", `Bearer ${adminToken}`);
 
       expect(response.status).toBe(404);
       expect(response.body).toHaveProperty("message", "User not found");
@@ -237,9 +270,15 @@ describe("UserController", () => {
         .returning("user_id");
       const userId = insertedUser[0].user_id || insertedUser[0];
 
+      const adminToken = generateToken({
+        user_id: userId,
+        email: "user1@example.com",
+        role_id: 1,
+      });
       // Wykonujemy żądanie HTTP
       const response = await request(app)
         .put(`/api/users/${userId}`)
+        .set("Authorization", `Bearer ${adminToken}`)
         .send({ first_name: "Updated" });
 
       // Sprawdzamy odpowiedź
@@ -266,9 +305,15 @@ describe("UserController", () => {
         .returning("user_id");
       const userId = insertedUser[0].user_id || insertedUser[0];
 
+      const adminToken = generateToken({
+        user_id: userId,
+        email: "user1@example.com",
+        role_id: 1,
+      });
       // Wykonujemy żądanie HTTP
-      const response = await request(app).delete(`/api/users/${userId}`);
-
+      const response = await request(app)
+        .delete(`/api/users/${userId}`)
+        .set("Authorization", `Bearer ${adminToken}`);
       // Sprawdzamy odpowiedź
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty(

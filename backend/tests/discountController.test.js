@@ -1,6 +1,7 @@
 const request = require("supertest");
 const app = require("../app");
 const setupDB = require("../db");
+const jwt = require("jsonwebtoken");
 
 let knex;
 
@@ -19,6 +20,19 @@ beforeEach(async () => {
   // Czyszczenie tabeli przed każdym testem
   await knex.raw("DELETE FROM discounts");
   await knex.raw("DELETE FROM sqlite_sequence WHERE name = 'discounts'");
+});
+
+const generateToken = (user) => {
+  return jwt.sign(
+    { id: user.id, email: user.email, role_id: user.role_id },
+    process.env.JWT_SECRET,
+    { expiresIn: "1h" }
+  );
+};
+const adminToken = generateToken({
+  id: 1,
+  email: "admin@example.com",
+  role_id: 1, // Rola admina
 });
 
 describe("DiscountController (Integration Tests)", () => {
@@ -101,6 +115,7 @@ describe("DiscountController (Integration Tests)", () => {
       // Wykonaj żądanie HTTP
       const response = await request(app)
         .post("/api/discounts")
+        .set("Authorization", `Bearer ${adminToken}`)
         .send(newDiscount);
 
       // Sprawdź odpowiedź
@@ -118,7 +133,10 @@ describe("DiscountController (Integration Tests)", () => {
 
     it("should handle errors and return status 500", async () => {
       // Przykład błędu, np. brak wymaganych danych
-      const response = await request(app).post("/api/discounts").send({});
+      const response = await request(app)
+        .post("/api/discounts")
+        .set("Authorization", `Bearer ${adminToken}`)
+        .send({});
 
       // Sprawdź odpowiedź
       expect(response.status).toBe(500);
@@ -145,6 +163,7 @@ describe("DiscountController (Integration Tests)", () => {
       // Wykonaj żądanie HTTP
       const response = await request(app)
         .put("/api/discounts/1")
+        .set("Authorization", `Bearer ${adminToken}`)
         .send(updatedDiscount);
 
       // Sprawdź odpowiedź
@@ -165,6 +184,7 @@ describe("DiscountController (Integration Tests)", () => {
     it("should return 404 if discount to update is not found", async () => {
       const response = await request(app)
         .put("/api/discounts/999")
+        .set("Authorization", `Bearer ${adminToken}`)
         .send({ title: "Updated Discount" });
 
       // Sprawdź odpowiedź
@@ -181,7 +201,9 @@ describe("DiscountController (Integration Tests)", () => {
       });
 
       // Wykonaj żądanie HTTP
-      const response = await request(app).delete("/api/discounts/1");
+      const response = await request(app)
+        .delete("/api/discounts/1")
+        .set("Authorization", `Bearer ${adminToken}`);
 
       // Sprawdź odpowiedź
       expect(response.status).toBe(200);
@@ -198,7 +220,9 @@ describe("DiscountController (Integration Tests)", () => {
     });
 
     it("should return 404 if discount to delete is not found", async () => {
-      const response = await request(app).delete("/api/discounts/999");
+      const response = await request(app)
+        .delete("/api/discounts/999")
+        .set("Authorization", `Bearer ${adminToken}`);
 
       // Sprawdź odpowiedź
       expect(response.status).toBe(404);
