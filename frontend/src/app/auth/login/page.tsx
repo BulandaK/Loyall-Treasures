@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { AiOutlineGoogle } from "react-icons/ai"; // Import ikony Google
+import { useAuth } from "@/context/AuthContext";
 import "./login.css";
 
 export default function LoginPage() {
@@ -11,6 +12,7 @@ export default function LoginPage() {
 
   const [message, setMessage] = useState("");
   const [isSuccess, setIsSuccess] = useState(false); // Dodajemy stan dla sukcesu
+  const { login } = useAuth();
 
   // Obsługa zmiany w polach formularza
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -23,29 +25,13 @@ export default function LoginPage() {
     e.preventDefault();
 
     try {
-      const response = await fetch("http://localhost:8080/api/users/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-        }),
-      });
-
-      if (response.ok) {
-        setMessage("Login successful!");
-        setIsSuccess(true); // Ustawiamy sukces na true
-        setFormData({ email: "", password: "" });
-      } else {
-        const errorData = await response.json();
-        setMessage(`Error: ${errorData.message}`);
-        setIsSuccess(false); // Ustawiamy sukces na false
-      }
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      await login(formData.email, formData.password);
+      setMessage("Login successful!");
+      setIsSuccess(true); // Ustawiamy sukces na true
+      setFormData({ email: "", password: "" });
     } catch (error) {
-      setMessage("An error occurred while logging in.");
+      setMessage("Login failed. Please check your credentials.");
+      console.error("Login error:", error);
       setIsSuccess(false); // Ustawiamy sukces na false
     }
   };

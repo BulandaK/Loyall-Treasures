@@ -1,5 +1,6 @@
 import "./globals.css";
 import { Poppins, Roboto } from "next/font/google";
+import { AuthProvider } from "@/context/AuthContext";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -25,7 +26,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${poppins.variable} ${roboto.variable}`}>
-      <body>{children}</body>
+      <body>
+        <AuthProvider>{children}</AuthProvider>
+      </body>
     </html>
   );
 }
