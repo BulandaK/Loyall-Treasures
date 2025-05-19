@@ -1,53 +1,72 @@
-const DiscountCategory = require("../models/discountCategoryModel");
+const DiscountCategoryService = require("../services/discountCategoryService");
 
 class DiscountCategoryController {
   // Pobierz wszystkie kategorie
   static async getAllCategories(req, res) {
     try {
-      const categories = await DiscountCategory.query();
+      const categories = await DiscountCategoryService.getAllCategories();
       res.status(200).json(categories);
     } catch (error) {
-      res.status(500).json({ message: "Error fetching categories", error });
+      res.status(500).json({ message: error.message });
+    }
+  }
+
+  static async getCategoryById(req, res) {
+    try {
+      const category = await DiscountCategoryService.getCategoryById(
+        req.params.id
+      );
+      res.status(200).json(category);
+    } catch (error) {
+      if (error.message === "Category not found") {
+        return res.status(404).json({ message: error.message });
+      }
+      res.status(500).json({ message: error.message });
     }
   }
 
   // Dodaj nową kategorię
   static async createCategory(req, res) {
     try {
-      const { name } = req.body;
-
-      // Walidacja nazwy
-      if (!name || typeof name !== "string" || name.trim().length === 0) {
-        return res.status(400).json({ message: "Valid name is required" });
-      }
-
-      // Sprawdź czy kategoria o takiej nazwie już istnieje
-      const existingCategory = await DiscountCategory.query()
-        .where("name", name.trim())
-        .first();
-
-      if (existingCategory) {
-        return res
-          .status(409)
-          .json({ message: "Category with this name already exists" });
-      }
-
-      // Przygotuj dane do wstawienia
-      const categoryData = {
-        name: name.trim(),
-        description: req.body.description || null,
-        icon: req.body.icon || null,
-      };
-
-      // Utwórz nową kategorię
-      const newCategory = await DiscountCategory.query().insert(categoryData);
+      const newCategory = await DiscountCategoryService.createCategory(
+        req.body
+      );
       res.status(201).json(newCategory);
     } catch (error) {
-      console.error("Error creating category:", error);
-      res.status(500).json({
-        message: "Error creating category",
-        error: error.message,
-      });
+      if (error.message === "Valid name is required") {
+        return res.status(400).json({ message: error.message });
+      }
+      if (error.message === "Category with this name already exists") {
+        return res.status(409).json({ message: error.message });
+      }
+      res.status(500).json({ message: error.message });
+    }
+  }
+
+  static async updateCategory(req, res) {
+    try {
+      const updatedCategory = await DiscountCategoryService.updateCategory(
+        req.params.id,
+        req.body
+      );
+      res.status(200).json(updatedCategory);
+    } catch (error) {
+      if (error.message === "Category not found") {
+        return res.status(404).json({ message: error.message });
+      }
+      res.status(500).json({ message: error.message });
+    }
+  }
+
+  static async deleteCategory(req, res) {
+    try {
+      await DiscountCategoryService.deleteCategory(req.params.id);
+      res.status(200).json({ message: "Category deleted successfully" });
+    } catch (error) {
+      if (error.message === "Category not found") {
+        return res.status(404).json({ message: error.message });
+      }
+      res.status(500).json({ message: error.message });
     }
   }
 }
