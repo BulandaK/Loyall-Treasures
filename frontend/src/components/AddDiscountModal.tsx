@@ -18,6 +18,8 @@ interface AddDiscountModalProps {
   onAdd: (discount: any) => void;
   categories: Category[];
   locations: Location[];
+  onCategoryAdd: (category: Category) => void;
+  onLocationAdd: (location: Location) => void;
 }
 
 const AddDiscountModal: React.FC<AddDiscountModalProps> = ({
@@ -26,6 +28,8 @@ const AddDiscountModal: React.FC<AddDiscountModalProps> = ({
   onAdd,
   categories,
   locations,
+  onCategoryAdd,
+  onLocationAdd,
 }) => {
   const { user } = useAuth();
   const [error, setError] = useState<string | null>(null);
@@ -38,11 +42,83 @@ const AddDiscountModal: React.FC<AddDiscountModalProps> = ({
     start_date: new Date().toISOString().split("T")[0],
     end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
       .toISOString()
-      .split("T")[0], // 30 days from now
+      .split("T")[0],
     is_active: true,
     location_id: "",
     category_id: "",
   });
+
+  const [newCategory, setNewCategory] = useState({
+    name: "",
+  });
+
+  const [newLocation, setNewLocation] = useState({
+    name: "",
+    address: "",
+  });
+
+  const [showNewCategoryForm, setShowNewCategoryForm] = useState(false);
+  const [showNewLocationForm, setShowNewLocationForm] = useState(false);
+
+  const handleCreateCategory = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const userData = localStorage.getItem("user");
+      if (!userData) return;
+      const user = JSON.parse(userData);
+      const token = user.token;
+
+      const response = await fetch("http://localhost:8080/api/categories", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(newCategory),
+      });
+
+      if (response.ok) {
+        const category = await response.json();
+        onCategoryAdd(category);
+        setNewCategory({ name: "" });
+        setShowNewCategoryForm(false);
+      } else {
+        setError("Failed to create category");
+      }
+    } catch (error) {
+      setError("Error creating category");
+    }
+  };
+
+  const handleCreateLocation = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const userData = localStorage.getItem("user");
+      if (!userData) return;
+      const user = JSON.parse(userData);
+      const token = user.token;
+
+      const response = await fetch("http://localhost:8080/api/locations", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(newLocation),
+      });
+
+      if (response.ok) {
+        const location = await response.json();
+        onLocationAdd(location);
+        setNewLocation({ name: "", address: "" });
+        setShowNewLocationForm(false);
+      } else {
+        setError("Failed to create location");
+      }
+    } catch (error) {
+      setError("Error creating location");
+    }
+  };
 
   const validateForm = () => {
     if (!newDiscount.title.trim()) {
@@ -145,7 +221,7 @@ const AddDiscountModal: React.FC<AddDiscountModalProps> = ({
       start_date: new Date().toISOString().split("T")[0],
       end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
         .toISOString()
-        .split("T")[0], // 30 days from now
+        .split("T")[0],
       is_active: true,
       location_id: "",
       category_id: "",
@@ -285,48 +361,121 @@ const AddDiscountModal: React.FC<AddDiscountModalProps> = ({
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Location
-              </label>
-              <select
-                name="location_id"
-                value={newDiscount.location_id}
-                onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
-                required
-              >
-                <option value="">Select a location</option>
-                {locations.map((location) => (
-                  <option
-                    key={location.location_id}
-                    value={location.location_id}
+              <div className="flex justify-between items-center mb-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Location
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setShowNewLocationForm(!showNewLocationForm)}
+                  className="text-sm text-green-600 hover:text-green-700"
+                >
+                  {showNewLocationForm ? "Cancel" : "+ Add New Location"}
+                </button>
+              </div>
+              {showNewLocationForm ? (
+                <div className="space-y-2">
+                  <input
+                    type="text"
+                    placeholder="Location Name"
+                    value={newLocation.name}
+                    onChange={(e) =>
+                      setNewLocation({ ...newLocation, name: e.target.value })
+                    }
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                    required
+                  />
+                  <input
+                    type="text"
+                    placeholder="Address"
+                    value={newLocation.address}
+                    onChange={(e) =>
+                      setNewLocation({
+                        ...newLocation,
+                        address: e.target.value,
+                      })
+                    }
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={handleCreateLocation}
+                    className="w-full px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
                   >
-                    {location.name}
-                  </option>
-                ))}
-              </select>
+                    Create Location
+                  </button>
+                </div>
+              ) : (
+                <select
+                  name="location_id"
+                  value={newDiscount.location_id}
+                  onChange={handleInputChange}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                  required
+                >
+                  <option value="">Select a location</option>
+                  {locations.map((location) => (
+                    <option
+                      key={location.location_id}
+                      value={location.location_id}
+                    >
+                      {location.name}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Category
-              </label>
-              <select
-                name="category_id"
-                value={newDiscount.category_id}
-                onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
-                required
-              >
-                <option value="">Select a category</option>
-                {categories.map((category) => (
-                  <option
-                    key={category.category_id}
-                    value={category.category_id}
+              <div className="flex justify-between items-center mb-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Category
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setShowNewCategoryForm(!showNewCategoryForm)}
+                  className="text-sm text-green-600 hover:text-green-700"
+                >
+                  {showNewCategoryForm ? "Cancel" : "+ Add New Category"}
+                </button>
+              </div>
+              {showNewCategoryForm ? (
+                <div className="space-y-2">
+                  <input
+                    type="text"
+                    placeholder="Category Name"
+                    value={newCategory.name}
+                    onChange={(e) => setNewCategory({ name: e.target.value })}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={handleCreateCategory}
+                    className="w-full px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
                   >
-                    {category.name}
-                  </option>
-                ))}
-              </select>
+                    Create Category
+                  </button>
+                </div>
+              ) : (
+                <select
+                  name="category_id"
+                  value={newDiscount.category_id}
+                  onChange={handleInputChange}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                  required
+                >
+                  <option value="">Select a category</option>
+                  {categories.map((category) => (
+                    <option
+                      key={category.category_id}
+                      value={category.category_id}
+                    >
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
             <div className="flex items-center">
               <input

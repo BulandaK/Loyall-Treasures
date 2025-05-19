@@ -28,6 +28,7 @@ const generateToken = (user) => {
     { expiresIn: "1h" }
   );
 };
+
 const adminToken = generateToken({
   id: 1,
   email: "admin@example.com",
@@ -89,12 +90,12 @@ describe("DiscountCategoryController", () => {
 
       // Sprawdzamy, czy dane zostały zapisane w bazie
       const categoryInDB = await knex("discount_categories")
-        .where({ category_id: response.body.category_id }) // Poprawione
+        .where({ category_id: response.body.category_id })
         .first();
       expect(categoryInDB).toMatchObject(newCategory);
     });
 
-    it("should return 400 if required fields are missing", async () => {
+    it("should return 400 if name is missing", async () => {
       // Wykonujemy żądanie HTTP bez wymaganych pól
       const response = await request(app)
         .post("/api/categories")
@@ -103,7 +104,63 @@ describe("DiscountCategoryController", () => {
 
       // Sprawdzamy odpowiedź
       expect(response.status).toBe(400);
-      expect(response.body).toHaveProperty("message", "Name is required");
+      expect(response.body).toHaveProperty("message", "Valid name is required");
+    });
+
+    it("should return 400 if name is empty string", async () => {
+      const response = await request(app)
+        .post("/api/categories")
+        .set("Authorization", `Bearer ${adminToken}`)
+        .send({ name: "" });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty("message", "Valid name is required");
+    });
+
+    it("should return 400 if name is only whitespace", async () => {
+      const response = await request(app)
+        .post("/api/categories")
+        .set("Authorization", `Bearer ${adminToken}`)
+        .send({ name: "   " });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty("message", "Valid name is required");
+    });
+
+    it("should return 409 if category with same name exists", async () => {
+      // Najpierw tworzymy kategorię
+      await knex("discount_categories").insert({
+        name: "Existing Category",
+        description: "Test Description",
+      });
+
+      // Próbujemy utworzyć kategorię o tej samej nazwie
+      const response = await request(app)
+        .post("/api/categories")
+        .set("Authorization", `Bearer ${adminToken}`)
+        .send({ name: "Existing Category" });
+
+      expect(response.status).toBe(409);
+      expect(response.body).toHaveProperty(
+        "message",
+        "Category with this name already exists"
+      );
+    });
+
+    it("should create category with optional fields", async () => {
+      const newCategory = {
+        name: "Test Category",
+        description: "Test Description",
+        icon: "test-icon",
+      };
+
+      const response = await request(app)
+        .post("/api/categories")
+        .set("Authorization", `Bearer ${adminToken}`)
+        .send(newCategory);
+
+      expect(response.status).toBe(201);
+      expect(response.body).toMatchObject(newCategory);
     });
   });
 });

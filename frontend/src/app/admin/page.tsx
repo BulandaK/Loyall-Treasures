@@ -302,6 +302,14 @@ const AdminPanel = () => {
     }
   };
 
+  const handleAddCategory = (category: Category) => {
+    setCategories([...categories, category]);
+  };
+
+  const handleAddLocation = (location: Location) => {
+    setLocations([...locations, location]);
+  };
+
   if (!isAdmin) {
     return <div>Loading...</div>;
   }
@@ -540,6 +548,8 @@ const AdminPanel = () => {
           onAdd={handleAddDiscount}
           categories={categories}
           locations={locations}
+          onCategoryAdd={handleAddCategory}
+          onLocationAdd={handleAddLocation}
         />
       </div>
     </div>
