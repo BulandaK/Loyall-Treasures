@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 
 interface User {
   email: string;
-  first_name: string;
-  last_name: string;
+  role_id: number;
+  token: string;
 }
 
 interface AuthContextType {
@@ -40,9 +40,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
 
       if (response.ok) {
-        const userData = await response.json();
-        setUser(userData);
-        localStorage.setItem("user", JSON.stringify(userData));
+        const { token } = await response.json();
+
+        // Decode token to get user data
+        const base64Url = token.split(".")[1];
+        const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+        const jsonPayload = decodeURIComponent(
+          atob(base64)
+            .split("")
+            .map(function (c) {
+              return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+            })
+            .join("")
+        );
+
+        const userData = JSON.parse(jsonPayload);
+
+        // Create user object with token
+        const user: User = {
+          email: userData.email,
+          role_id: userData.role_id,
+          token: token,
+        };
+
+        setUser(user);
+        localStorage.setItem("user", JSON.stringify(user));
         router.push("/"); // Redirect to home page after successful login
       } else {
         throw new Error("Login failed");
