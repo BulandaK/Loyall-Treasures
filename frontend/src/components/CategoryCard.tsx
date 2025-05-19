@@ -1,12 +1,20 @@
 import Image from "next/image";
 
+interface CategoryCardProps {
+  title: string;
+  description: string;
+  image: string;
+  buttonText: string;
+  buttonColor: string;
+}
+
 const CategoryCard = ({
   title,
   description,
   image,
   buttonText,
   buttonColor,
-}: any) => {
+}: CategoryCardProps) => {
   return (
     <div className="bg-white shadow-md rounded-lg p-4">
       <Image
