@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 interface User {
+  id: number;
   email: string;
   role_id: number;
   token: string;
@@ -58,6 +59,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         // Create user object with token
         const user: User = {
+          id: userData.id,
           email: userData.email,
           role_id: userData.role_id,
           token: token,

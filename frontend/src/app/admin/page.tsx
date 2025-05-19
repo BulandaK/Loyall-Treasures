@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Navigation from "@/components/Navigation";
+import AddDiscountModal from "@/components/AddDiscountModal";
 
 interface User {
   user_id: number;
@@ -33,14 +34,28 @@ interface Discount {
   };
 }
 
+interface Category {
+  category_id: number;
+  name: string;
+}
+
+interface Location {
+  location_id: number;
+  name: string;
+  address: string;
+}
+
 const AdminPanel = () => {
   const router = useRouter();
   const [isAdmin, setIsAdmin] = useState(false);
   const [activeTab, setActiveTab] = useState("users");
   const [users, setUsers] = useState<User[]>([]);
   const [discounts, setDiscounts] = useState<Discount[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [locations, setLocations] = useState<Location[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isAddDiscountModalOpen, setIsAddDiscountModalOpen] = useState(false);
 
   useEffect(() => {
     const checkAdminRole = async () => {
@@ -77,7 +92,12 @@ const AdminPanel = () => {
       const user = JSON.parse(userData);
       const token = user.token;
 
-      const [usersResponse, discountsResponse] = await Promise.all([
+      const [
+        usersResponse,
+        discountsResponse,
+        categoriesResponse,
+        locationsResponse,
+      ] = await Promise.all([
         fetch("http://localhost:8080/api/users", {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -88,15 +108,35 @@ const AdminPanel = () => {
             Authorization: `Bearer ${token}`,
           },
         }),
+        fetch("http://localhost:8080/api/categories", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }),
+        fetch("http://localhost:8080/api/locations", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }),
       ]);
 
-      if (usersResponse.ok && discountsResponse.ok) {
-        const [usersData, discountsData] = await Promise.all([
-          usersResponse.json(),
-          discountsResponse.json(),
-        ]);
+      if (
+        usersResponse.ok &&
+        discountsResponse.ok &&
+        categoriesResponse.ok &&
+        locationsResponse.ok
+      ) {
+        const [usersData, discountsData, categoriesData, locationsData] =
+          await Promise.all([
+            usersResponse.json(),
+            discountsResponse.json(),
+            categoriesResponse.json(),
+            locationsResponse.json(),
+          ]);
         setUsers(usersData);
         setDiscounts(discountsData);
+        setCategories(categoriesData);
+        setLocations(locationsData);
       } else {
         setError("Failed to fetch data");
       }
@@ -212,6 +252,53 @@ const AdminPanel = () => {
       }
     } catch (error) {
       console.error("Error updating discount status:", error);
+    }
+  };
+
+  const handleAddDiscount = async (discountData: any) => {
+    try {
+      const userData = localStorage.getItem("user");
+      if (!userData) {
+        router.push("/login");
+        return;
+      }
+      const user = JSON.parse(userData);
+      const token = user.token;
+
+      const response = await fetch("http://localhost:8080/api/discounts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(discountData),
+      });
+
+      if (response.ok) {
+        const newDiscount = await response.json();
+
+        // Fetch the complete discount data with relations
+        const discountResponse = await fetch(
+          `http://localhost:8080/api/discounts/${newDiscount.discount_id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (discountResponse.ok) {
+          const completeDiscount = await discountResponse.json();
+          setDiscounts([...discounts, completeDiscount]);
+          setIsAddDiscountModalOpen(false);
+        } else {
+          console.error("Failed to fetch complete discount data");
+        }
+      } else {
+        console.error("Failed to create discount");
+      }
+    } catch (error) {
+      console.error("Error creating discount:", error);
     }
   };
 
@@ -358,7 +445,16 @@ const AdminPanel = () => {
         {/* Discounts Tab */}
         {activeTab === "discounts" && (
           <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-2xl font-semibold mb-4">Discount Management</h2>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-semibold">Discount Management</h2>
+              <button
+                onClick={() => setIsAddDiscountModalOpen(true)}
+                className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+              >
+                Add New Discount
+              </button>
+            </div>
+
             <div className="overflow-x-auto">
               <table className="min-w-full">
                 <thead>
@@ -437,6 +533,14 @@ const AdminPanel = () => {
             </div>
           </div>
         )}
+
+        <AddDiscountModal
+          isOpen={isAddDiscountModalOpen}
+          onClose={() => setIsAddDiscountModalOpen(false)}
+          onAdd={handleAddDiscount}
+          categories={categories}
+          locations={locations}
+        />
       </div>
     </div>
   );
