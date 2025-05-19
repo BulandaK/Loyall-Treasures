@@ -142,6 +142,40 @@ const AdminPanel = () => {
     }
   };
 
+  const handleDeleteUser = async (userId: number) => {
+    if (!confirm("Czy na pewno chcesz usunąć tego użytkownika?")) {
+      return;
+    }
+
+    try {
+      const userData = localStorage.getItem("user");
+      if (!userData) {
+        router.push("/login");
+        return;
+      }
+      const user = JSON.parse(userData);
+      const token = user.token;
+
+      const response = await fetch(
+        `http://localhost:8080/api/users/${userId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        setUsers(users.filter((user) => user.user_id !== userId));
+      } else {
+        console.error("Failed to delete user");
+      }
+    } catch (error) {
+      console.error("Error deleting user:", error);
+    }
+  };
+
   const handleDiscountStatusChange = async (
     discountId: number,
     isActive: boolean
@@ -289,21 +323,29 @@ const AdminPanel = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <button
-                          onClick={() =>
-                            handleUserStatusChange(
-                              user.user_id,
-                              !user.is_active
-                            )
-                          }
-                          className={`px-3 py-1 rounded ${
-                            user.is_active
-                              ? "bg-red-100 text-red-700 hover:bg-red-200"
-                              : "bg-green-100 text-green-700 hover:bg-green-200"
-                          }`}
-                        >
-                          {user.is_active ? "Deactivate" : "Activate"}
-                        </button>
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() =>
+                              handleUserStatusChange(
+                                user.user_id,
+                                !user.is_active
+                              )
+                            }
+                            className={`px-3 py-1 rounded ${
+                              user.is_active
+                                ? "bg-red-100 text-red-700 hover:bg-red-200"
+                                : "bg-green-100 text-green-700 hover:bg-green-200"
+                            }`}
+                          >
+                            {user.is_active ? "Deactivate" : "Activate"}
+                          </button>
+                          <button
+                            onClick={() => handleDeleteUser(user.user_id)}
+                            className="px-3 py-1 rounded bg-red-100 text-red-700 hover:bg-red-200"
+                          >
+                            Delete
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
