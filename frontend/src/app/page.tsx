@@ -1,11 +1,9 @@
 "use client";
 import CategoryCard from "@/components/CategoryCard";
+import Navigation from "@/components/Navigation";
 import Image from "next/image";
-import Link from "next/link";
-import { useAuth } from "@/context/AuthContext";
 
 export default function Home() {
-  const { user, logout } = useAuth();
   const categories = [
     {
       id: 1,
@@ -35,46 +33,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Header */}
-      <header className="bg-white shadow-md">
-        <div className="container mx-auto px-6 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-green-600">Loyall</h1>
-          <nav className="flex space-x-6 justify-center items-center">
-            <a href="#" className="text-gray-700 hover:text-green-600">
-              Home
-            </a>
-            <a href="#" className="text-gray-700 hover:text-green-600">
-              Categories
-            </a>
-            <a href="#" className="text-gray-700 hover:text-green-600">
-              Notifications
-            </a>
-            <a href="#" className="text-gray-700 hover:text-green-600">
-              Contact Us
-            </a>
-            {user ? (
-              <>
-                <span className="text-gray-700">{user.email}</span>
-                <button
-                  onClick={logout}
-                  className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
-                >
-                  Logout
-                </button>
-              </>
-            ) : (
-              <>
-                <button className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-                  <Link href="/auth/login"> Login</Link>
-                </button>
-                <button className="border-2 border-green-600 text-green-600 px-4 py-2 rounded hover:bg-green-700 hover:text-white">
-                  <Link href="/auth/signup"> Register</Link>
-                </button>
-              </>
-            )}
-          </nav>
-        </div>
-      </header>
+      <Navigation />
 
       {/* Hero Section */}
       <section className="bg-white shadow-md mt-6 mx-6 rounded-lg p-6 flex items-center">
