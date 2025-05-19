@@ -255,6 +255,46 @@ const AdminPanel = () => {
     }
   };
 
+  const handleDeleteDiscount = async (discountId: number) => {
+    if (!confirm("Czy na pewno chcesz usunąć tę zniżkę?")) {
+      return;
+    }
+
+    try {
+      const userData = localStorage.getItem("user");
+      if (!userData) {
+        router.push("/login");
+        return;
+      }
+      const user = JSON.parse(userData);
+      const token = user.token;
+
+      const response = await fetch(
+        `http://localhost:8080/api/discounts/${discountId}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        setDiscounts(
+          discounts.filter((discount) => discount.discount_id !== discountId)
+        );
+      } else if (response.status === 401) {
+        console.error("Unauthorized: Please log in again");
+        router.push("/login");
+      } else {
+        console.error("Failed to delete discount");
+      }
+    } catch (error) {
+      console.error("Error deleting discount:", error);
+    }
+  };
+
   const handleAddDiscount = async (discountData: any) => {
     try {
       const userData = localStorage.getItem("user");
@@ -342,7 +382,7 @@ const AdminPanel = () => {
     <div className="min-h-screen bg-gray-100">
       <Navigation />
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-8">Admin Panel</h1>
+        <h1 className="text-3xl font-bold mb-8 text-black">Admin Panel</h1>
 
         {/* Tabs */}
         <div className="mb-8">
@@ -351,7 +391,7 @@ const AdminPanel = () => {
               className={`px-4 py-2 ${
                 activeTab === "users"
                   ? "border-b-2 border-green-500 text-green-600"
-                  : "text-gray-600"
+                  : "text-black"
               }`}
               onClick={() => setActiveTab("users")}
             >
@@ -361,7 +401,7 @@ const AdminPanel = () => {
               className={`px-4 py-2 ${
                 activeTab === "discounts"
                   ? "border-b-2 border-green-500 text-green-600"
-                  : "text-gray-600"
+                  : "text-black"
               }`}
               onClick={() => setActiveTab("discounts")}
             >
@@ -373,21 +413,23 @@ const AdminPanel = () => {
         {/* Users Tab */}
         {activeTab === "users" && (
           <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-2xl font-semibold mb-4">User Management</h2>
+            <h2 className="text-2xl font-semibold mb-4 text-black">
+              User Management
+            </h2>
             <div className="overflow-x-auto">
               <table className="min-w-full">
                 <thead>
                   <tr className="bg-gray-50">
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider">
                       User
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider">
                       Email
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider">
                       Status
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
@@ -396,14 +438,14 @@ const AdminPanel = () => {
                   {users.map((user) => (
                     <tr key={user.user_id}>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">
+                        <div className="text-sm font-medium text-black">
                           {user.first_name} {user.last_name}
                         </div>
-                        <div className="text-sm text-gray-500">
+                        <div className="text-sm text-black">
                           {user.username}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-black">
                         {user.email}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -454,7 +496,9 @@ const AdminPanel = () => {
         {activeTab === "discounts" && (
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-semibold">Discount Management</h2>
+              <h2 className="text-2xl font-semibold text-black">
+                Discount Management
+              </h2>
               <button
                 onClick={() => setIsAddDiscountModalOpen(true)}
                 className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
@@ -467,19 +511,19 @@ const AdminPanel = () => {
               <table className="min-w-full">
                 <thead>
                   <tr className="bg-gray-50">
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider">
                       Discount
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider">
                       Location
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider">
                       Price
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider">
                       Status
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
@@ -488,21 +532,21 @@ const AdminPanel = () => {
                   {discounts.map((discount) => (
                     <tr key={discount.discount_id}>
                       <td className="px-6 py-4">
-                        <div className="text-sm font-medium text-gray-900">
+                        <div className="text-sm font-medium text-black">
                           {discount.title}
                         </div>
-                        <div className="text-sm text-gray-500">
+                        <div className="text-sm text-black">
                           {discount.category.name}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-black">
                         {discount.location.name}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">
+                        <div className="text-sm text-black">
                           {discount.discount_price} zł
                         </div>
-                        <div className="text-sm text-gray-500 line-through">
+                        <div className="text-sm text-black line-through">
                           {discount.normal_price} zł
                         </div>
                       </td>
@@ -518,21 +562,31 @@ const AdminPanel = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <button
-                          onClick={() =>
-                            handleDiscountStatusChange(
-                              discount.discount_id,
-                              !discount.is_active
-                            )
-                          }
-                          className={`px-3 py-1 rounded ${
-                            discount.is_active
-                              ? "bg-red-100 text-red-700 hover:bg-red-200"
-                              : "bg-green-100 text-green-700 hover:bg-green-200"
-                          }`}
-                        >
-                          {discount.is_active ? "Deactivate" : "Activate"}
-                        </button>
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() =>
+                              handleDiscountStatusChange(
+                                discount.discount_id,
+                                !discount.is_active
+                              )
+                            }
+                            className={`px-3 py-1 rounded ${
+                              discount.is_active
+                                ? "bg-red-100 text-red-700 hover:bg-red-200"
+                                : "bg-green-100 text-green-700 hover:bg-green-200"
+                            }`}
+                          >
+                            {discount.is_active ? "Deactivate" : "Activate"}
+                          </button>
+                          <button
+                            onClick={() =>
+                              handleDeleteDiscount(discount.discount_id)
+                            }
+                            className="px-3 py-1 rounded bg-red-100 text-red-700 hover:bg-red-200"
+                          >
+                            Delete
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}

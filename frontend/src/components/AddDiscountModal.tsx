@@ -235,11 +235,10 @@ const AddDiscountModal: React.FC<AddDiscountModalProps> = ({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-semibold">Add New Discount</h2>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
-          >
+          <h2 className="text-2xl font-semibold text-black">
+            Add New Discount
+          </h2>
+          <button onClick={onClose} className="text-black hover:text-gray-700">
             <svg
               className="w-6 h-6"
               fill="none"
@@ -265,7 +264,7 @@ const AddDiscountModal: React.FC<AddDiscountModalProps> = ({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-black">
                 Title
               </label>
               <input
@@ -273,24 +272,24 @@ const AddDiscountModal: React.FC<AddDiscountModalProps> = ({
                 name="title"
                 value={newDiscount.title}
                 onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 text-black"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-black">
                 Description
               </label>
               <textarea
                 name="description"
                 value={newDiscount.description}
                 onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 text-black"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-black">
                 Normal Price
               </label>
               <input
@@ -298,14 +297,14 @@ const AddDiscountModal: React.FC<AddDiscountModalProps> = ({
                 name="normal_price"
                 value={newDiscount.normal_price}
                 onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 text-black"
                 required
                 min="0"
                 step="0.01"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-black">
                 Discount Price
               </label>
               <input
@@ -313,14 +312,14 @@ const AddDiscountModal: React.FC<AddDiscountModalProps> = ({
                 name="discount_price"
                 value={newDiscount.discount_price}
                 onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 text-black"
                 required
                 min="0"
                 step="0.01"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-black">
                 Percentage Discount
               </label>
               <input
@@ -328,14 +327,14 @@ const AddDiscountModal: React.FC<AddDiscountModalProps> = ({
                 name="percentage_discount"
                 value={newDiscount.percentage_discount}
                 onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 text-black"
                 required
                 min="0"
                 max="100"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-black">
                 Start Date
               </label>
               <input
@@ -343,12 +342,12 @@ const AddDiscountModal: React.FC<AddDiscountModalProps> = ({
                 name="start_date"
                 value={newDiscount.start_date}
                 onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 text-black"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-black">
                 End Date
               </label>
               <input
@@ -356,13 +355,13 @@ const AddDiscountModal: React.FC<AddDiscountModalProps> = ({
                 name="end_date"
                 value={newDiscount.end_date}
                 onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 text-black"
                 required
               />
             </div>
             <div>
               <div className="flex justify-between items-center mb-2">
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-black">
                   Location
                 </label>
                 <button
@@ -382,7 +381,7 @@ const AddDiscountModal: React.FC<AddDiscountModalProps> = ({
                     onChange={(e) =>
                       setNewLocation({ ...newLocation, name: e.target.value })
                     }
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 text-black"
                     required
                   />
                   <input
@@ -395,7 +394,7 @@ const AddDiscountModal: React.FC<AddDiscountModalProps> = ({
                         address: e.target.value,
                       })
                     }
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 text-black"
                     required
                   />
                   <button
@@ -411,7 +410,7 @@ const AddDiscountModal: React.FC<AddDiscountModalProps> = ({
                   name="location_id"
                   value={newDiscount.location_id}
                   onChange={handleInputChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 text-black"
                   required
                 >
                   <option value="">Select a location</option>
@@ -428,7 +427,7 @@ const AddDiscountModal: React.FC<AddDiscountModalProps> = ({
             </div>
             <div>
               <div className="flex justify-between items-center mb-2">
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-black">
                   Category
                 </label>
                 <button
@@ -446,7 +445,7 @@ const AddDiscountModal: React.FC<AddDiscountModalProps> = ({
                     placeholder="Category Name"
                     value={newCategory.name}
                     onChange={(e) => setNewCategory({ name: e.target.value })}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 text-black"
                     required
                   />
                   <button
@@ -462,7 +461,7 @@ const AddDiscountModal: React.FC<AddDiscountModalProps> = ({
                   name="category_id"
                   value={newDiscount.category_id}
                   onChange={handleInputChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 text-black"
                   required
                 >
                   <option value="">Select a category</option>
@@ -493,7 +492,7 @@ const AddDiscountModal: React.FC<AddDiscountModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+              className="px-4 py-2 border border-gray-300 rounded-md text-black hover:bg-gray-50"
             >
               Cancel
             </button>
