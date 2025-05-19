@@ -29,10 +29,54 @@ class LocationController {
   // Dodaj nową lokalizację
   static async createLocation(req, res) {
     try {
-      const newLocation = await Location.query().insert(req.body);
+      const { name, address } = req.body;
+
+      // Walidacja wymaganych pól
+      if (!name || typeof name !== "string" || name.trim().length === 0) {
+        return res.status(400).json({ message: "Valid name is required" });
+      }
+
+      if (
+        !address ||
+        typeof address !== "string" ||
+        address.trim().length === 0
+      ) {
+        return res.status(400).json({ message: "Valid address is required" });
+      }
+
+      // Sprawdź czy lokalizacja o takiej nazwie już istnieje
+      const existingLocation = await Location.query()
+        .where("name", name.trim())
+        .first();
+
+      if (existingLocation) {
+        return res
+          .status(409)
+          .json({ message: "Location with this name already exists" });
+      }
+
+      // Przygotuj dane do wstawienia
+      const locationData = {
+        name: name.trim(),
+        address: address.trim(),
+        city_id: req.body.city_id || null,
+        latitude: req.body.latitude || null,
+        longitude: req.body.longitude || null,
+        phone: req.body.phone || null,
+        email: req.body.email || null,
+        website: req.body.website || null,
+        is_active: req.body.is_active !== undefined ? req.body.is_active : true,
+      };
+
+      // Utwórz nową lokalizację
+      const newLocation = await Location.query().insert(locationData);
       res.status(201).json(newLocation);
     } catch (error) {
-      res.status(500).json({ message: "Error creating location", error });
+      console.error("Error creating location:", error);
+      res.status(500).json({
+        message: "Error creating location",
+        error: error.message,
+      });
     }
   }
 

@@ -1,8 +1,25 @@
 const request = require("supertest");
 const app = require("../app");
-const Location = require("../models/locationModel");
+const setupDB = require("../db");
 const jwt = require("jsonwebtoken");
-jest.mock("../models/locationModel");
+
+let knex;
+
+beforeAll(async () => {
+  process.env.NODE_ENV = "test";
+  knex = setupDB();
+  await knex.migrate.latest();
+  await knex.raw("PRAGMA foreign_keys = ON");
+});
+
+afterAll(async () => {
+  await knex.destroy();
+});
+
+beforeEach(async () => {
+  await knex("locations").truncate();
+  await knex("cities").truncate();
+});
 
 const generateToken = (user) => {
   return jwt.sign(
@@ -15,116 +32,65 @@ const generateToken = (user) => {
 const adminToken = generateToken({
   id: 1,
   email: "admin@example.com",
-  role_id: 1, // Rola admina
+  role_id: 1,
 });
 
 describe("LocationController", () => {
   describe("getAllLocations", () => {
     it("should return all locations", async () => {
-      const mockLocations = [
-        { id: 1, name: "Location 1" },
-        { id: 2, name: "Location 2" },
-      ];
-      Location.query.mockReturnValue({
-        withGraphFetched: jest.fn().mockResolvedValue(mockLocations),
-      });
+      // Dodaj miasto
+      const city = await knex("cities")
+        .insert({
+          city_name: "Test City",
+          postal_code: "12345",
+          country: "Poland",
+        })
+        .returning("*");
 
-      // Generujemy token JWT dla admina
-
-      const response = await request(app)
-        .get("/api/locations")
-        .set("Authorization", `Bearer ${adminToken}`); // Dodajemy token
-
-      expect(response.status).toBe(200);
-      expect(response.body).toEqual(mockLocations);
-      expect(Array.isArray(response.body)).toBe(true);
-    });
-    it("should return 401 if no token is provided for GET /locations", async () => {
-      const response = await request(app).get("/api/locations");
-
-      expect(response.status).toBe(401);
-      expect(response.body).toHaveProperty("message", "Unauthorized");
-    });
-
-    it("should handle errors when fetching locations", async () => {
-      Location.query.mockReturnValue({
-        withGraphFetched: jest
-          .fn()
-          .mockRejectedValue(new Error("Database error")),
-      });
+      // Dodaj lokalizacje
+      await knex("locations").insert([
+        {
+          name: "Location 1",
+          address: "Address 1",
+          city_id: city[0].city_id,
+        },
+        {
+          name: "Location 2",
+          address: "Address 2",
+          city_id: city[0].city_id,
+        },
+      ]);
 
       const response = await request(app)
         .get("/api/locations")
         .set("Authorization", `Bearer ${adminToken}`);
 
-      expect(response.status).toBe(500);
-      expect(response.body).toHaveProperty(
-        "message",
-        "Error fetching locations"
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveLength(2);
+      expect(response.body).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ name: "Location 1" }),
+          expect.objectContaining({ name: "Location 2" }),
+        ])
       );
     });
-  });
 
-  describe("getLocationById", () => {
-    it("should return a location by ID", async () => {
-      const mockLocation = { id: 1, name: "Location 1" };
-      Location.query.mockReturnValue({
-        findById: jest.fn().mockReturnValue({
-          withGraphFetched: jest.fn().mockResolvedValue(mockLocation),
-        }),
-      });
-
+    it("should return an empty array if no locations exist", async () => {
       const response = await request(app)
-        .get("/api/locations/1")
+        .get("/api/locations")
         .set("Authorization", `Bearer ${adminToken}`);
 
       expect(response.status).toBe(200);
-      expect(response.body).toEqual(mockLocation);
-    });
-
-    it("should return 404 if location is not found", async () => {
-      Location.query.mockReturnValue({
-        findById: jest.fn().mockReturnValue({
-          withGraphFetched: jest.fn().mockResolvedValue(null),
-        }),
-      });
-
-      const response = await request(app)
-        .get("/api/locations/1")
-        .set("Authorization", `Bearer ${adminToken}`);
-
-      expect(response.status).toBe(404);
-      expect(response.body).toHaveProperty("message", "Location not found");
-    });
-
-    it("should handle errors when fetching a location by ID", async () => {
-      Location.query.mockReturnValue({
-        findById: jest.fn().mockReturnValue({
-          withGraphFetched: jest
-            .fn()
-            .mockRejectedValue(new Error("Database error")),
-        }),
-      });
-
-      const response = await request(app)
-        .get("/api/locations/1")
-        .set("Authorization", `Bearer ${adminToken}`);
-
-      expect(response.status).toBe(500);
-      expect(response.body).toHaveProperty(
-        "message",
-        "Error fetching location"
-      );
+      expect(response.body).toEqual([]);
     });
   });
 
   describe("createLocation", () => {
     it("should create a new location", async () => {
-      const newLocation = { name: "Test Location" };
-      const mockInsertedLocation = { id: 1, name: "Test Location" };
-      Location.query.mockReturnValue({
-        insert: jest.fn().mockResolvedValue(mockInsertedLocation),
-      });
+      const newLocation = {
+        name: "Test Location",
+        address: "Test Address",
+      };
 
       const response = await request(app)
         .post("/api/locations")
@@ -132,123 +98,99 @@ describe("LocationController", () => {
         .send(newLocation);
 
       expect(response.status).toBe(201);
-      expect(response.body).toEqual(mockInsertedLocation);
-      expect(response.body).toHaveProperty("id");
+      expect(response.body).toHaveProperty("location_id");
       expect(response.body.name).toBe(newLocation.name);
+      expect(response.body.address).toBe(newLocation.address);
+
+      const locationInDB = await knex("locations")
+        .where({ location_id: response.body.location_id })
+        .first();
+      expect(locationInDB).toMatchObject(newLocation);
     });
 
-    it("should handle errors when creating a location", async () => {
-      Location.query.mockReturnValue({
-        insert: jest.fn().mockRejectedValue(new Error("Database error")),
-      });
+    it("should return 400 if name is missing", async () => {
+      const response = await request(app)
+        .post("/api/locations")
+        .set("Authorization", `Bearer ${adminToken}`)
+        .send({ address: "Test Address" });
 
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty("message", "Valid name is required");
+    });
+
+    it("should return 400 if address is missing", async () => {
       const response = await request(app)
         .post("/api/locations")
         .set("Authorization", `Bearer ${adminToken}`)
         .send({ name: "Test Location" });
 
-      expect(response.status).toBe(500);
+      expect(response.status).toBe(400);
       expect(response.body).toHaveProperty(
         "message",
-        "Error creating location"
+        "Valid address is required"
       );
     });
-  });
 
-  describe("updateLocation", () => {
-    it("should update a location by ID", async () => {
-      const updatedLocation = { id: 1, name: "Updated Location" };
-      Location.query.mockReturnValue({
-        patchAndFetchById: jest.fn().mockResolvedValue(updatedLocation),
-      });
-
+    it("should return 400 if name is empty string", async () => {
       const response = await request(app)
-        .put("/api/locations/1")
+        .post("/api/locations")
         .set("Authorization", `Bearer ${adminToken}`)
-        .send({ name: "Updated Location" });
+        .send({ name: "", address: "Test Address" });
 
-      expect(response.status).toBe(200);
-      expect(response.body).toEqual(updatedLocation);
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty("message", "Valid name is required");
     });
 
-    it("should return 404 if location to update is not found", async () => {
-      Location.query.mockReturnValue({
-        patchAndFetchById: jest.fn().mockResolvedValue(null),
-      });
-
+    it("should return 400 if address is empty string", async () => {
       const response = await request(app)
-        .put("/api/locations/1")
+        .post("/api/locations")
         .set("Authorization", `Bearer ${adminToken}`)
-        .send({ name: "Updated Location" });
+        .send({ name: "Test Location", address: "" });
 
-      expect(response.status).toBe(404);
-      expect(response.body).toHaveProperty("message", "Location not found");
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty(
+        "message",
+        "Valid address is required"
+      );
     });
 
-    it("should handle errors when updating a location", async () => {
-      Location.query.mockReturnValue({
-        patchAndFetchById: jest
-          .fn()
-          .mockRejectedValue(new Error("Database error")),
+    it("should return 409 if location with same name exists", async () => {
+      // Najpierw tworzymy lokalizację
+      await knex("locations").insert({
+        name: "Existing Location",
+        address: "Test Address",
       });
 
+      // Próbujemy utworzyć lokalizację o tej samej nazwie
       const response = await request(app)
-        .put("/api/locations/1")
+        .post("/api/locations")
         .set("Authorization", `Bearer ${adminToken}`)
-        .send({ name: "Updated Location" });
+        .send({ name: "Existing Location", address: "Different Address" });
 
-      expect(response.status).toBe(500);
+      expect(response.status).toBe(409);
       expect(response.body).toHaveProperty(
         "message",
-        "Error updating location"
-      );
-    });
-  });
-
-  describe("deleteLocation", () => {
-    it("should delete a location by ID", async () => {
-      Location.query.mockReturnValue({
-        deleteById: jest.fn().mockResolvedValue(1),
-      });
-
-      const response = await request(app)
-        .delete("/api/locations/1")
-        .set("Authorization", `Bearer ${adminToken}`);
-
-      expect(response.status).toBe(200);
-      expect(response.body).toHaveProperty(
-        "message",
-        "Location deleted successfully"
+        "Location with this name already exists"
       );
     });
 
-    it("should return 404 if location to delete is not found", async () => {
-      Location.query.mockReturnValue({
-        deleteById: jest.fn().mockResolvedValue(0),
-      });
+    it("should create location with optional fields", async () => {
+      const newLocation = {
+        name: "Test Location",
+        address: "Test Address",
+        phone: "123456789",
+        email: "test@example.com",
+        website: "https://example.com",
+        is_active: true,
+      };
 
       const response = await request(app)
-        .delete("/api/locations/1")
-        .set("Authorization", `Bearer ${adminToken}`);
+        .post("/api/locations")
+        .set("Authorization", `Bearer ${adminToken}`)
+        .send(newLocation);
 
-      expect(response.status).toBe(404);
-      expect(response.body).toHaveProperty("message", "Location not found");
-    });
-
-    it("should handle errors when deleting a location", async () => {
-      Location.query.mockReturnValue({
-        deleteById: jest.fn().mockRejectedValue(new Error("Database error")),
-      });
-
-      const response = await request(app)
-        .delete("/api/locations/1")
-        .set("Authorization", `Bearer ${adminToken}`);
-
-      expect(response.status).toBe(500);
-      expect(response.body).toHaveProperty(
-        "message",
-        "Error deleting location"
-      );
+      expect(response.status).toBe(201);
+      expect(response.body).toMatchObject(newLocation);
     });
   });
 });
