@@ -7,10 +7,16 @@ const routes = require("./routes");
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpecs = require("./swagger");
 const passport = require("./passport");
+const notificationService = require("./services/notificationService"); // <--- NOWY IMPORT
 
 const app = express();
 
 dbSetup();
+notificationService.connectRabbitMQ().catch((err) => {
+  // <--- INICJALIZACJA POŁĄCZENIA
+  console.error("Initial RabbitMQ connection failed:", err);
+  // Można rozważyć zatrzymanie aplikacji, jeśli RabbitMQ jest krytyczny
+});
 
 // Konfiguracja CORS
 app.use(
