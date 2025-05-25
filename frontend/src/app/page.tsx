@@ -2,6 +2,7 @@
 import CategoryCard from "@/components/CategoryCard";
 import Navigation from "@/components/Navigation";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Home() {
   const categories = [
@@ -52,7 +53,7 @@ export default function Home() {
             our community today!
           </p>
           <button className="mt-4 bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700">
-            Explore Now
+            <Link href="/discounts">Explore Now</Link>
           </button>
         </div>
       </section>
