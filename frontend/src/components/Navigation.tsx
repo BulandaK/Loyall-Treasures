@@ -17,7 +17,7 @@ const Navigation = () => {
         </Link>
         <nav className="flex space-x-4 lg:space-x-6 justify-center items-center">
           <Link href="/" className="text-gray-700 hover:text-green-600">
-            Home
+            Strona główna
           </Link>
           <Link
             href="/discounts"
@@ -28,13 +28,13 @@ const Navigation = () => {
           <Link href="#" className="text-gray-700 hover:text-green-600">
             {" "}
             {/* Placeholder */}
-            Notifications
+            Powiadomienia
           </Link>
           <Link
             href="/contact-us"
             className="text-gray-700 hover:text-green-600"
           >
-            Contact Us
+            Kontakt
           </Link>
 
           {/* Link do panelu admina widoczny tylko dla admina */}
@@ -45,7 +45,7 @@ const Navigation = () => {
             >
               <FaUserShield className="mr-1 h-5 w-5 text-green-600" />{" "}
               {/* Opcjonalna ikona */}
-              Admin Panel
+              Panel admina
             </Link>
           )}
 
@@ -67,13 +67,13 @@ const Navigation = () => {
                 href="/auth/login"
                 className="bg-green-600 text-white px-3 py-2 sm:px-4 rounded hover:bg-green-700 text-sm sm:text-base"
               >
-                Login
+                Zaloguj
               </Link>
               <Link
                 href="/auth/signup"
                 className="border-2 border-green-600 text-green-600 px-3 py-2 sm:px-4 rounded hover:bg-green-700 hover:text-white text-sm sm:text-base"
               >
-                Register
+                Zarejestruj
               </Link>
             </>
           )}

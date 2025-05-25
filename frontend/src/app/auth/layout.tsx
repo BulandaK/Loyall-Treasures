@@ -10,9 +10,7 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-
-  // Zmienna określająca, czy to logowanie czy rejestracja
-  const isLogin = pathname.includes("login");
+  const isLogin = pathname?.includes("login") ?? false;
 
   return (
     <div
@@ -21,7 +19,7 @@ export default function AuthLayout({
       {/* Lewa sekcja */}
       <div className="w-1/3 flex flex-col justify-center items-center text-white p-8">
         <h1 className="text-4xl font-bold mb-4">
-          {isLogin ? "Welcome Back!" : "LoyAll all you need"}
+          {isLogin ? "Witaj ponownie!" : "LoyAll - wszystko czego potrzebujesz"}
         </h1>
         <Image
           width={200}

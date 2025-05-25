@@ -4,13 +4,13 @@ import { AuthProvider } from "@/context/AuthContext";
 
 const poppins = Poppins({
   subsets: ["latin"],
-  weight: ["400", "600", "700"], // Wagi czcionki
+  weight: ["400", "600", "700"],
   variable: "--font-poppins",
 });
 
 const roboto = Roboto({
   subsets: ["latin"],
-  weight: ["400", "500"], // Wagi czcionki
+  weight: ["400", "500"],
   variable: "--font-roboto",
 });
 

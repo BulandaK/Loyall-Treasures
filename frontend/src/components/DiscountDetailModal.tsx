@@ -48,23 +48,22 @@ interface Discount {
 
 interface DiscountDetailModalProps {
   isOpen: boolean;
-  onClose: (wasRedeemed?: boolean, redeemedDiscountId?: number) => void; // Zaktualizowany typ onClose
+  onClose: (wasRedeemed?: boolean, redeemedDiscountId?: number) => void;
   discount: Discount | null;
-  isRedeemed: boolean; // Dodajemy ten prop
+  isRedeemed: boolean;
 }
 
 const DiscountDetailModal: React.FC<DiscountDetailModalProps> = ({
   isOpen,
   onClose,
   discount,
-  isRedeemed: initialIsRedeemed, // Zmieniamy nazwę, żeby nie kolidowała ze stanem
+  isRedeemed: initialIsRedeemed,
 }) => {
   const { user } = useAuth();
   const router = useRouter();
   const [isCurrentlyRedeemed, setIsCurrentlyRedeemed] =
     React.useState(initialIsRedeemed);
 
-  // Aktualizuj stan, jeśli prop się zmieni (np. po zamknięciu i otwarciu innego modala)
   React.useEffect(() => {
     setIsCurrentlyRedeemed(initialIsRedeemed);
   }, [initialIsRedeemed]);
@@ -75,7 +74,6 @@ const DiscountDetailModal: React.FC<DiscountDetailModalProps> = ({
 
   const handleRedeemDiscount = async () => {
     if (!user || isCurrentlyRedeemed) {
-      // Dodatkowe sprawdzenie, czy już nie odebrano
       if (!user) router.push("/auth/login");
       return;
     }
@@ -96,11 +94,9 @@ const DiscountDetailModal: React.FC<DiscountDetailModalProps> = ({
 
       if (response.ok) {
         const redemptionData = await response.json();
-        alert(
-          `Zniżka "${discount.title}" została odebrana! ID Odbioru: ${redemptionData.redemption_id}`
-        );
-        setIsCurrentlyRedeemed(true); // Ustawiamy lokalny stan na odebrany
-        onClose(true, discount.discount_id); // Przekaż informację o sukcesie
+        alert(`Zniżka "${discount.title}" została odebrana!`);
+        setIsCurrentlyRedeemed(true);
+        onClose(true, discount.discount_id);
       } else {
         const errorData = await response.json();
         alert(
@@ -111,7 +107,6 @@ const DiscountDetailModal: React.FC<DiscountDetailModalProps> = ({
         onClose(false);
       }
     } catch (error) {
-      console.error("Error redeeming discount:", error);
       alert("Wystąpił błąd podczas próby odebrania zniżki.");
       onClose(false);
     }
@@ -123,14 +118,13 @@ const DiscountDetailModal: React.FC<DiscountDetailModalProps> = ({
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-gray-800">{discount.title}</h2>
           <button
-            onClick={() => onClose()} // Wywołaj onClose bez argumentów przy standardowym zamknięciu
+            onClick={() => onClose()}
             className="text-gray-600 hover:text-gray-800"
           >
             <FaTimes size={24} />
           </button>
         </div>
 
-        {/* ... (reszta kodu szczegółów bez zmian) ... */}
         <div className="space-y-4">
           <p className="text-gray-700 text-base leading-relaxed">
             {discount.description}

@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { AiOutlineGoogle } from "react-icons/ai"; // Import ikony Google
+import { AiOutlineGoogle } from "react-icons/ai";
 import { useAuth } from "@/context/AuthContext";
 import "./login.css";
 
@@ -11,28 +11,26 @@ export default function LoginPage() {
   });
 
   const [message, setMessage] = useState("");
-  const [isSuccess, setIsSuccess] = useState(false); // Dodajemy stan dla sukcesu
+  const [isSuccess, setIsSuccess] = useState(false);
   const { login } = useAuth();
 
-  // Obsługa zmiany w polach formularza
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Obsługa wysyłania formularza
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
       await login(formData.email, formData.password);
       setMessage("Login successful!");
-      setIsSuccess(true); // Ustawiamy sukces na true
+      setIsSuccess(true);
       setFormData({ email: "", password: "" });
     } catch (error) {
       setMessage("Login failed. Please check your credentials.");
       console.error("Login error:", error);
-      setIsSuccess(false); // Ustawiamy sukces na false
+      setIsSuccess(false);
     }
   };
 
@@ -62,7 +60,7 @@ export default function LoginPage() {
           type="submit"
           className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
         >
-          Login
+          Zaloguj
         </button>
       </form>
       {message && (
@@ -76,8 +74,8 @@ export default function LoginPage() {
       )}
       <div className="flex space-x-4 mt-6">
         <button className="social-button bg-red-500 text-white flex items-center justify-center space-x-2">
-          <AiOutlineGoogle size={20} /> {/* Ikona Google */}
-          <span>Login with Google</span>
+          <AiOutlineGoogle size={20} />
+          <span>Zaloguj przez Google</span>
         </button>
       </div>
     </div>

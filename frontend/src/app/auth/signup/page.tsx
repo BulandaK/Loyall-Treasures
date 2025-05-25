@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { AiOutlineGoogle } from "react-icons/ai"; // Import ikony Google
+import { AiOutlineGoogle } from "react-icons/ai";
 import "./signup.css";
 
 export default function SignupPage() {
@@ -12,15 +12,13 @@ export default function SignupPage() {
   });
 
   const [message, setMessage] = useState("");
-  const [isSuccess, setIsSuccess] = useState(false); // Dodajemy stan dla sukcesu
+  const [isSuccess, setIsSuccess] = useState(false);
 
-  // Obsługa zmiany w polach formularza
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Obsługa wysyłania formularza
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -33,38 +31,38 @@ export default function SignupPage() {
         body: JSON.stringify({
           username: `${formData.firstName.toLowerCase()}_${formData.lastName.toLowerCase()}`,
           email: formData.email,
-          password: formData.password, // Przekazujemy hasło jako "password"
+          password: formData.password,
           first_name: formData.firstName,
           last_name: formData.lastName,
-          role_id: 2, // Domyślna rola użytkownika
+          role_id: 2,
         }),
       });
 
       if (response.ok) {
         setMessage("Account created successfully!");
-        setIsSuccess(true); // Ustawiamy sukces na true
+        setIsSuccess(true);
         setFormData({ firstName: "", lastName: "", email: "", password: "" });
       } else {
         const errorData = await response.json();
         setMessage(`Error: ${errorData.message}`);
-        setIsSuccess(false); // Ustawiamy sukces na false
+        setIsSuccess(false);
       }
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       setMessage("An error occurred while creating the account.");
-      setIsSuccess(false); // Ustawiamy sukces na false
+      setIsSuccess(false);
     }
   };
 
   return (
     <div>
-      <h2 className="text-3xl font-bold mb-6">Create Account</h2>
+      <h2 className="text-3xl font-bold mb-6">Stwórz konto</h2>
       <form className="w-full max-w-md space-y-4" onSubmit={handleSubmit}>
         <div className="flex space-x-4">
           <input
             type="text"
             name="firstName"
-            placeholder="First Name"
+            placeholder="Imie"
             className="input-field"
             value={formData.firstName}
             onChange={handleChange}
@@ -73,7 +71,7 @@ export default function SignupPage() {
           <input
             type="text"
             name="lastName"
-            placeholder="Last Name"
+            placeholder="Nazwisko"
             className="input-field"
             value={formData.lastName}
             onChange={handleChange}
@@ -92,7 +90,7 @@ export default function SignupPage() {
         <input
           type="password"
           name="password"
-          placeholder="Password"
+          placeholder="Hasło"
           className="input-field"
           value={formData.password}
           onChange={handleChange}
@@ -102,7 +100,7 @@ export default function SignupPage() {
           type="submit"
           className="w-full bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600"
         >
-          Create Account
+          Stwórz konto
         </button>
       </form>
       {message && (
@@ -116,8 +114,8 @@ export default function SignupPage() {
       )}
       <div className="flex space-x-4 mt-6">
         <button className="social-button bg-red-500 text-white flex items-center justify-center space-x-2">
-          <AiOutlineGoogle size={20} /> {/* Ikona Google */}
-          <span>Sign up with Google</span>
+          <AiOutlineGoogle size={20} />
+          <span>Zarejestruj przez Google</span>
         </button>
       </div>
     </div>

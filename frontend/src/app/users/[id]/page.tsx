@@ -21,9 +21,9 @@ interface User {
   is_active: boolean;
   role: Role;
 }
-
 const UserPage = () => {
-  const { id } = useParams(); // Pobierz ID użytkownika z URL
+  const params = useParams();
+  const id = params?.id;
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
