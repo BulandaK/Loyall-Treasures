@@ -5,26 +5,23 @@ import DiscountCard from "@/components/DiscountCard";
 import Navigation from "@/components/Navigation";
 import { FaFilter } from "react-icons/fa";
 import DiscountDetailModal from "@/components/DiscountDetailModal";
+import { useAuth } from "@/context/AuthContext";
 
-// Interfejsy na podstawie modeli backendowych
 interface LocationFromAPI {
   location_id: number;
   name: string;
   address: string;
 }
-
 interface CategoryFromAPI {
   category_id: number;
   name: string;
 }
-
 interface UserFromAPI {
   user_id: number;
   username: string;
   first_name?: string;
   last_name?: string;
 }
-
 interface Discount {
   discount_id: number;
   title: string;
@@ -44,7 +41,15 @@ interface Discount {
   createdBy?: UserFromAPI;
 }
 
+interface Redemption {
+  redemption_id: number;
+  user_id: number;
+  discount_id: number;
+  redeemed_at: string;
+}
+
 const DiscountsPage = () => {
+  const { user } = useAuth();
   const [discounts, setDiscounts] = useState<Discount[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -55,23 +60,24 @@ const DiscountsPage = () => {
   const [selectedDiscount, setSelectedDiscount] = useState<Discount | null>(
     null
   );
+  const [redeemedDiscountIds, setRedeemedDiscountIds] = useState<Set<number>>(
+    new Set()
+  );
 
   useEffect(() => {
     const fetchDiscounts = async () => {
+      setLoading(true);
       try {
         const response = await fetch("http://localhost:8080/api/discounts");
         if (!response.ok) {
           throw new Error("Failed to fetch discounts");
         }
         const data = await response.json();
-
-        // **Poprawka: Konwersja cen na liczby**
         const formattedDiscounts = data.map((discount: any) => ({
           ...discount,
           normal_price: parseFloat(discount.normal_price),
           discount_price: parseFloat(discount.discount_price),
         }));
-
         setDiscounts(formattedDiscounts);
 
         const uniqueCategories = Array.from(
@@ -89,14 +95,52 @@ const DiscountsPage = () => {
     fetchDiscounts();
   }, []);
 
+  useEffect(() => {
+    const fetchRedeemedDiscounts = async () => {
+      if (user && user.id && user.token) {
+        try {
+          const response = await fetch(
+            `http://localhost:8080/api/redemptions/users/${user.id}`,
+            {
+              headers: {
+                Authorization: `Bearer ${user.token}`,
+              },
+            }
+          );
+          if (response.ok) {
+            const redeemed: Redemption[] = await response.json();
+            const ids = new Set(redeemed.map((r) => r.discount_id));
+            setRedeemedDiscountIds(ids);
+          } else {
+            console.error("Failed to fetch redeemed discounts");
+          }
+        } catch (error) {
+          console.error("Error fetching redeemed discounts:", error);
+        }
+      } else {
+        setRedeemedDiscountIds(new Set());
+      }
+    };
+
+    fetchRedeemedDiscounts();
+  }, [user]);
+
   const handleOpenModal = (discount: Discount) => {
     setSelectedDiscount(discount);
     setIsModalOpen(true);
   };
 
-  const handleCloseModal = () => {
+  const handleCloseModal = (
+    wasRedeemed: boolean = false,
+    redeemedDiscountId?: number
+  ) => {
     setIsModalOpen(false);
     setSelectedDiscount(null);
+    if (wasRedeemed && redeemedDiscountId) {
+      setRedeemedDiscountIds((prevIds) =>
+        new Set(prevIds).add(redeemedDiscountId)
+      );
+    }
   };
 
   const filteredDiscounts =
@@ -106,7 +150,7 @@ const DiscountsPage = () => {
           (discount) => discount.category.name === selectedCategory
         );
 
-  if (loading) {
+  if (loading && discounts.length === 0) {
     return (
       <div className="min-h-screen bg-gray-100">
         <Navigation />
@@ -167,22 +211,30 @@ const DiscountsPage = () => {
               endDate={discount.end_date}
               categoryName={discount.category.name}
               onDetailsClick={() => handleOpenModal(discount)}
+              isRedeemed={
+                user ? redeemedDiscountIds.has(discount.discount_id) : false
+              }
             />
           ))}
         </div>
 
-        {filteredDiscounts.length === 0 && (
+        {filteredDiscounts.length === 0 && !loading && (
           <div className="text-center text-gray-600 mt-8">
             Brak dostępnych zniżek w wybranej kategorii
           </div>
         )}
       </div>
 
-      <DiscountDetailModal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        discount={selectedDiscount}
-      />
+      {selectedDiscount && (
+        <DiscountDetailModal
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          discount={selectedDiscount}
+          isRedeemed={
+            user ? redeemedDiscountIds.has(selectedDiscount.discount_id) : false
+          }
+        />
+      )}
     </div>
   );
 };

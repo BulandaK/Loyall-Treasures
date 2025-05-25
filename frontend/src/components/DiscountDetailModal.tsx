@@ -1,10 +1,17 @@
 "use client";
 
 import React from "react";
-import { FaCalendarAlt, FaMapMarkerAlt, FaTag, FaTimes } from "react-icons/fa";
+import {
+  FaCalendarAlt,
+  FaMapMarkerAlt,
+  FaTag,
+  FaTimes,
+  FaCheckCircle,
+} from "react-icons/fa"; // Dodano FaCheckCircle
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 
+// Interfejsy (bez zmian w stosunku do DiscountsPage)
 interface LocationFromAPI {
   location_id: number;
   name: string;
@@ -41,25 +48,35 @@ interface Discount {
 
 interface DiscountDetailModalProps {
   isOpen: boolean;
-  onClose: () => void;
+  onClose: (wasRedeemed?: boolean, redeemedDiscountId?: number) => void; // Zaktualizowany typ onClose
   discount: Discount | null;
+  isRedeemed: boolean; // Dodajemy ten prop
 }
 
 const DiscountDetailModal: React.FC<DiscountDetailModalProps> = ({
   isOpen,
   onClose,
   discount,
+  isRedeemed: initialIsRedeemed, // Zmieniamy nazwę, żeby nie kolidowała ze stanem
 }) => {
   const { user } = useAuth();
   const router = useRouter();
+  const [isCurrentlyRedeemed, setIsCurrentlyRedeemed] =
+    React.useState(initialIsRedeemed);
+
+  // Aktualizuj stan, jeśli prop się zmieni (np. po zamknięciu i otwarciu innego modala)
+  React.useEffect(() => {
+    setIsCurrentlyRedeemed(initialIsRedeemed);
+  }, [initialIsRedeemed]);
 
   if (!isOpen || !discount) {
     return null;
   }
 
   const handleRedeemDiscount = async () => {
-    if (!user) {
-      router.push("/auth/login");
+    if (!user || isCurrentlyRedeemed) {
+      // Dodatkowe sprawdzenie, czy już nie odebrano
+      if (!user) router.push("/auth/login");
       return;
     }
 
@@ -82,7 +99,8 @@ const DiscountDetailModal: React.FC<DiscountDetailModalProps> = ({
         alert(
           `Zniżka "${discount.title}" została odebrana! ID Odbioru: ${redemptionData.redemption_id}`
         );
-        onClose();
+        setIsCurrentlyRedeemed(true); // Ustawiamy lokalny stan na odebrany
+        onClose(true, discount.discount_id); // Przekaż informację o sukcesie
       } else {
         const errorData = await response.json();
         alert(
@@ -90,10 +108,12 @@ const DiscountDetailModal: React.FC<DiscountDetailModalProps> = ({
             errorData.message || response.statusText
           }`
         );
+        onClose(false);
       }
     } catch (error) {
       console.error("Error redeeming discount:", error);
       alert("Wystąpił błąd podczas próby odebrania zniżki.");
+      onClose(false);
     }
   };
 
@@ -103,13 +123,14 @@ const DiscountDetailModal: React.FC<DiscountDetailModalProps> = ({
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-gray-800">{discount.title}</h2>
           <button
-            onClick={onClose}
+            onClick={() => onClose()} // Wywołaj onClose bez argumentów przy standardowym zamknięciu
             className="text-gray-600 hover:text-gray-800"
           >
             <FaTimes size={24} />
           </button>
         </div>
 
+        {/* ... (reszta kodu szczegółów bez zmian) ... */}
         <div className="space-y-4">
           <p className="text-gray-700 text-base leading-relaxed">
             {discount.description}
@@ -161,7 +182,6 @@ const DiscountDetailModal: React.FC<DiscountDetailModalProps> = ({
             <div className="flex justify-between items-center">
               <div>
                 <span className="text-3xl font-bold text-green-600">
-                  {/* Upewnijmy się, że wartość jest liczbą przed toFixed */}
                   {typeof discount.discount_price === "number"
                     ? discount.discount_price.toFixed(2)
                     : "N/A"}{" "}
@@ -183,18 +203,27 @@ const DiscountDetailModal: React.FC<DiscountDetailModalProps> = ({
 
         <div className="mt-8 flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4">
           <button
-            onClick={onClose}
+            onClick={() => onClose()}
             className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 transition-colors duration-300"
           >
             Zamknij
           </button>
           {user ? (
-            <button
-              onClick={handleRedeemDiscount}
-              className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors duration-300"
-            >
-              Odbierz Zniżkę
-            </button>
+            isCurrentlyRedeemed ? (
+              <button
+                disabled
+                className="px-6 py-2 bg-gray-400 text-white rounded-md cursor-not-allowed flex items-center"
+              >
+                <FaCheckCircle className="mr-2" /> Odebrane
+              </button>
+            ) : (
+              <button
+                onClick={handleRedeemDiscount}
+                className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors duration-300"
+              >
+                Odbierz Zniżkę
+              </button>
+            )
           ) : (
             <button
               onClick={() => router.push("/auth/login")}
