@@ -1,4 +1,3 @@
-// import Image from "next/image";
 import { FaMapMarkerAlt, FaCalendarAlt, FaTag } from "react-icons/fa";
 
 interface DiscountCardProps {
@@ -7,10 +6,11 @@ interface DiscountCardProps {
   normalPrice: number;
   discountPrice: number;
   percentageDiscount: number;
-  location: string;
+  locationName: string;
   startDate: string;
   endDate: string;
-  category: string;
+  categoryName: string;
+  onDetailsClick: () => void;
 }
 
 const DiscountCard = ({
@@ -19,10 +19,11 @@ const DiscountCard = ({
   normalPrice,
   discountPrice,
   percentageDiscount,
-  location,
+  locationName,
   startDate,
   endDate,
-  category,
+  categoryName,
+  onDetailsClick,
 }: DiscountCardProps) => {
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
@@ -38,7 +39,7 @@ const DiscountCard = ({
 
         <div className="flex items-center mb-4">
           <FaMapMarkerAlt className="text-gray-500 mr-2" />
-          <span className="text-gray-700">{location}</span>
+          <span className="text-gray-700">{locationName}</span>{" "}
         </div>
 
         <div className="flex items-center mb-4">
@@ -51,19 +52,22 @@ const DiscountCard = ({
 
         <div className="flex items-center mb-4">
           <FaTag className="text-gray-500 mr-2" />
-          <span className="text-gray-700">{category}</span>
+          <span className="text-gray-700">{categoryName}</span>{" "}
         </div>
 
         <div className="flex justify-between items-center mt-4">
           <div className="flex items-baseline">
             <span className="text-2xl font-bold text-green-600">
-              {discountPrice} zł
+              {discountPrice.toFixed(2)} zł
             </span>
             <span className="ml-2 text-gray-500 line-through">
-              {normalPrice} zł
+              {normalPrice.toFixed(2)} zł
             </span>
           </div>
-          <button className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-colors duration-300">
+          <button
+            onClick={onDetailsClick}
+            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-colors duration-300"
+          >
             Szczegóły
           </button>
         </div>

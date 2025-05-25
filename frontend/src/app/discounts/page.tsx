@@ -4,6 +4,26 @@ import React, { useEffect, useState } from "react";
 import DiscountCard from "@/components/DiscountCard";
 import Navigation from "@/components/Navigation";
 import { FaFilter } from "react-icons/fa";
+import DiscountDetailModal from "@/components/DiscountDetailModal";
+
+// Interfejsy na podstawie modeli backendowych
+interface LocationFromAPI {
+  location_id: number;
+  name: string;
+  address: string;
+}
+
+interface CategoryFromAPI {
+  category_id: number;
+  name: string;
+}
+
+interface UserFromAPI {
+  user_id: number;
+  username: string;
+  first_name?: string;
+  last_name?: string;
+}
 
 interface Discount {
   discount_id: number;
@@ -15,12 +35,13 @@ interface Discount {
   start_date: string;
   end_date: string;
   is_active: boolean;
-  location: {
-    name: string;
-  };
-  category: {
-    name: string;
-  };
+  location_id: number;
+  category_id: number;
+  created_by: number;
+  promo_code?: string;
+  location: LocationFromAPI;
+  category: CategoryFromAPI;
+  createdBy?: UserFromAPI;
 }
 
 const DiscountsPage = () => {
@@ -30,6 +51,11 @@ const DiscountsPage = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [categories, setCategories] = useState<string[]>([]);
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedDiscount, setSelectedDiscount] = useState<Discount | null>(
+    null
+  );
+
   useEffect(() => {
     const fetchDiscounts = async () => {
       try {
@@ -38,9 +64,16 @@ const DiscountsPage = () => {
           throw new Error("Failed to fetch discounts");
         }
         const data = await response.json();
-        setDiscounts(data);
 
-        // Extract unique categories
+        // **Poprawka: Konwersja cen na liczby**
+        const formattedDiscounts = data.map((discount: any) => ({
+          ...discount,
+          normal_price: parseFloat(discount.normal_price),
+          discount_price: parseFloat(discount.discount_price),
+        }));
+
+        setDiscounts(formattedDiscounts);
+
         const uniqueCategories = Array.from(
           new Set(data.map((discount: Discount) => discount.category.name))
         ) as string[];
@@ -55,6 +88,16 @@ const DiscountsPage = () => {
 
     fetchDiscounts();
   }, []);
+
+  const handleOpenModal = (discount: Discount) => {
+    setSelectedDiscount(discount);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedDiscount(null);
+  };
 
   const filteredDiscounts =
     selectedCategory === "all"
@@ -98,7 +141,7 @@ const DiscountsPage = () => {
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 text-black"
             >
               <option value="all">Wszystkie kategorie</option>
               {categories.map((category) => (
@@ -119,10 +162,11 @@ const DiscountsPage = () => {
               normalPrice={discount.normal_price}
               discountPrice={discount.discount_price}
               percentageDiscount={discount.percentage_discount}
-              location={discount.location.name}
+              locationName={discount.location.name}
               startDate={discount.start_date}
               endDate={discount.end_date}
-              category={discount.category.name}
+              categoryName={discount.category.name}
+              onDetailsClick={() => handleOpenModal(discount)}
             />
           ))}
         </div>
@@ -133,6 +177,12 @@ const DiscountsPage = () => {
           </div>
         )}
       </div>
+
+      <DiscountDetailModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        discount={selectedDiscount}
+      />
     </div>
   );
 };
