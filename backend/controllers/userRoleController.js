@@ -1,7 +1,6 @@
 const UserRole = require("../models/userRoleModel");
 
 class UserRoleController {
-  // Pobierz wszystkie role
   static async getAllRoles(req, res) {
     try {
       const roles = await UserRole.query();
@@ -11,7 +10,6 @@ class UserRoleController {
     }
   }
 
-  // Dodaj nową rolę
   static async createRole(req, res) {
     try {
       const newRole = await UserRole.query().insert(req.body);

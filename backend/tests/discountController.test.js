@@ -6,18 +6,17 @@ const jwt = require("jsonwebtoken");
 let knex;
 
 beforeAll(async () => {
-  process.env.NODE_ENV = "test"; // Ustawiamy środowisko na 'test'
-  knex = setupDB(); // Inicjalizujemy połączenie z bazą danych testową
-  await knex.migrate.latest(); // Uruchamiamy migracje
-  await knex.raw("PRAGMA foreign_keys = ON"); // Włączamy klucze obce dla SQLite3
+  process.env.NODE_ENV = "test";
+  knex = setupDB();
+  await knex.migrate.latest();
+  await knex.raw("PRAGMA foreign_keys = ON");
 });
 
 afterAll(async () => {
-  await knex.destroy(); // Zamykamy połączenie z bazą danych
+  await knex.destroy();
 });
 
 beforeEach(async () => {
-  // Czyszczenie tabeli przed każdym testem
   await knex.raw("DELETE FROM discounts");
   await knex.raw("DELETE FROM sqlite_sequence WHERE name = 'discounts'");
 });
@@ -32,22 +31,19 @@ const generateToken = (user) => {
 const adminToken = generateToken({
   id: 1,
   email: "admin@example.com",
-  role_id: 1, // Rola admina
+  role_id: 1,
 });
 
 describe("DiscountController (Integration Tests)", () => {
   describe("GET /api/discounts", () => {
     it("should return all discounts with status 200", async () => {
-      // Wstaw dane testowe
       await knex("discounts").insert([
         { discount_id: 1, title: "Discount 1", description: "Description 1" },
         { discount_id: 2, title: "Discount 2", description: "Description 2" },
       ]);
 
-      // Wykonaj żądanie HTTP
       const response = await request(app).get("/api/discounts");
 
-      // Sprawdź odpowiedź
       expect(response.status).toBe(200);
       expect(response.body).toHaveLength(2);
       expect(response.body).toEqual(
@@ -65,10 +61,8 @@ describe("DiscountController (Integration Tests)", () => {
     });
 
     it("should return an empty array if no discounts exist", async () => {
-      // Wykonaj żądanie HTTP bez danych w bazie
       const response = await request(app).get("/api/discounts");
 
-      // Sprawdź odpowiedź
       expect(response.status).toBe(200);
       expect(response.body).toEqual([]);
     });
@@ -76,16 +70,12 @@ describe("DiscountController (Integration Tests)", () => {
 
   describe("GET /api/discounts/:id", () => {
     it("should return a discount by ID with status 200", async () => {
-      // Wstaw dane testowe
       await knex("discounts").insert({
         title: "Discount 1",
         description: "Description 1",
       });
 
-      // Wykonaj żądanie HTTP
       const response = await request(app).get("/api/discounts/1");
-
-      // Sprawdź odpowiedź
       expect(response.status).toBe(200);
       expect(response.body).toEqual(
         expect.objectContaining({
@@ -96,10 +86,8 @@ describe("DiscountController (Integration Tests)", () => {
     });
 
     it("should return 404 if discount is not found", async () => {
-      // Wykonaj żądanie HTTP dla nieistniejącego ID
       const response = await request(app).get("/api/discounts/999");
 
-      // Sprawdź odpowiedź
       expect(response.status).toBe(404);
       expect(response.body).toHaveProperty("message", "Discount not found");
     });
@@ -112,19 +100,16 @@ describe("DiscountController (Integration Tests)", () => {
         description: "New Description",
       };
 
-      // Wykonaj żądanie HTTP
       const response = await request(app)
         .post("/api/discounts")
         .set("Authorization", `Bearer ${adminToken}`)
         .send(newDiscount);
 
-      // Sprawdź odpowiedź
       expect(response.status).toBe(201);
       expect(response.body).toHaveProperty("discount_id");
       expect(response.body).toHaveProperty("title", "New Discount");
       expect(response.body).toHaveProperty("description", "New Description");
 
-      // Sprawdź, czy dane zostały zapisane w bazie
       const discountInDB = await knex("discounts")
         .where({ discount_id: response.body.discount_id })
         .first();
@@ -132,13 +117,11 @@ describe("DiscountController (Integration Tests)", () => {
     });
 
     it("should handle errors and return status 500", async () => {
-      // Przykład błędu, np. brak wymaganych danych
       const response = await request(app)
         .post("/api/discounts")
         .set("Authorization", `Bearer ${adminToken}`)
         .send({});
 
-      // Sprawdź odpowiedź
       expect(response.status).toBe(500);
       expect(response.body).toHaveProperty(
         "message",
@@ -149,7 +132,6 @@ describe("DiscountController (Integration Tests)", () => {
 
   describe("PUT /api/discounts/:id", () => {
     it("should update a discount and return it with status 200", async () => {
-      // Wstaw dane testowe
       await knex("discounts").insert({
         title: "Old Discount",
         description: "Old Description",
@@ -160,13 +142,11 @@ describe("DiscountController (Integration Tests)", () => {
         description: "Updated Description",
       };
 
-      // Wykonaj żądanie HTTP
       const response = await request(app)
         .put("/api/discounts/1")
         .set("Authorization", `Bearer ${adminToken}`)
         .send(updatedDiscount);
 
-      // Sprawdź odpowiedź
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty("title", "Updated Discount");
       expect(response.body).toHaveProperty(
@@ -174,7 +154,6 @@ describe("DiscountController (Integration Tests)", () => {
         "Updated Description"
       );
 
-      // Sprawdź, czy dane zostały zaktualizowane w bazie
       const discountInDB = await knex("discounts")
         .where({ discount_id: 1 })
         .first();
@@ -187,7 +166,6 @@ describe("DiscountController (Integration Tests)", () => {
         .set("Authorization", `Bearer ${adminToken}`)
         .send({ title: "Updated Discount" });
 
-      // Sprawdź odpowiedź
       expect(response.status).toBe(404);
       expect(response.body).toHaveProperty("message", "Discount not found");
     });
@@ -195,24 +173,20 @@ describe("DiscountController (Integration Tests)", () => {
 
   describe("DELETE /api/discounts/:id", () => {
     it("should delete a discount and return status 200", async () => {
-      // Wstaw dane testowe
       await knex("discounts").insert({
         title: "Discount to delete",
       });
 
-      // Wykonaj żądanie HTTP
       const response = await request(app)
         .delete("/api/discounts/1")
         .set("Authorization", `Bearer ${adminToken}`);
 
-      // Sprawdź odpowiedź
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty(
         "message",
         "Discount deleted successfully"
       );
 
-      // Sprawdź, czy dane zostały usunięte z bazy
       const discountInDB = await knex("discounts")
         .where({ discount_id: 1 })
         .first();
@@ -224,7 +198,6 @@ describe("DiscountController (Integration Tests)", () => {
         .delete("/api/discounts/999")
         .set("Authorization", `Bearer ${adminToken}`);
 
-      // Sprawdź odpowiedź
       expect(response.status).toBe(404);
       expect(response.body).toHaveProperty("message", "Discount not found");
     });

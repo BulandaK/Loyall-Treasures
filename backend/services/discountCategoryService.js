@@ -27,12 +27,10 @@ class DiscountCategoryService {
     try {
       const { name } = categoryData;
 
-      // Walidacja wymaganych pól
       if (!name || typeof name !== "string" || name.trim().length === 0) {
         throw new Error("Valid name is required");
       }
 
-      // Sprawdź czy kategoria o takiej nazwie już istnieje
       const existingCategory = await DiscountCategory.query()
         .where("name", name.trim())
         .first();
@@ -41,7 +39,6 @@ class DiscountCategoryService {
         throw new Error("Category with this name already exists");
       }
 
-      // Przygotuj dane do wstawienia
       const data = {
         name: name.trim(),
         description: categoryData.description || null,

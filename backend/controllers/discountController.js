@@ -1,7 +1,6 @@
 const DiscountService = require("../services/discountService");
 
 class DiscountController {
-  // Pobierz wszystkie zniżki
   static async getAllDiscounts(req, res) {
     try {
       const discounts = await DiscountService.getAllDiscounts();
@@ -9,12 +8,11 @@ class DiscountController {
     } catch (error) {
       res.status(500).json({
         message: "Error fetching discounts",
-        error: error.message, // Szczegóły błędu
+        error: error.message,
       });
     }
   }
 
-  // Pobierz zniżkę po ID
   static async getDiscountById(req, res) {
     try {
       const discount = await DiscountService.getDiscountById(req.params.id);
@@ -25,13 +23,12 @@ class DiscountController {
       } else {
         res.status(500).json({
           message: "Error fetching discount",
-          error: error.message, // Szczegóły błędu
+          error: error.message,
         });
       }
     }
   }
 
-  // Dodaj nową zniżkę
   static async createDiscount(req, res) {
     try {
       const newDiscount = await DiscountService.createDiscount(req.body);
@@ -39,12 +36,11 @@ class DiscountController {
     } catch (error) {
       res.status(500).json({
         message: "Error creating discount",
-        error: error.message, // Szczegóły błędu
+        error: error.message,
       });
     }
   }
 
-  // Zaktualizuj zniżkę
   static async updateDiscount(req, res) {
     try {
       const updatedDiscount = await DiscountService.updateDiscount(
@@ -58,13 +54,12 @@ class DiscountController {
       } else {
         res.status(500).json({
           message: "Error updating discount",
-          error: error.message, // Szczegóły błędu
+          error: error.message,
         });
       }
     }
   }
 
-  // Usuń zniżkę
   static async deleteDiscount(req, res) {
     try {
       await DiscountService.deleteDiscount(req.params.id);
@@ -75,7 +70,7 @@ class DiscountController {
       } else {
         res.status(500).json({
           message: "Error deleting discount",
-          error: error.message, // Szczegóły błędu
+          error: error.message,
         });
       }
     }

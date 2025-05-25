@@ -1,7 +1,6 @@
 const LocationService = require("../services/locationService");
 
 class LocationController {
-  // Pobierz wszystkie lokalizacje
   static async getAllLocations(req, res) {
     try {
       const locations = await LocationService.getAllLocations();
@@ -11,7 +10,6 @@ class LocationController {
     }
   }
 
-  // Pobierz lokalizację po ID
   static async getLocationById(req, res) {
     try {
       const location = await LocationService.getLocationById(req.params.id);
@@ -24,7 +22,6 @@ class LocationController {
     }
   }
 
-  // Dodaj nową lokalizację
   static async createLocation(req, res) {
     try {
       const newLocation = await LocationService.createLocation(req.body);
@@ -43,7 +40,6 @@ class LocationController {
     }
   }
 
-  // Zaktualizuj lokalizację
   static async updateLocation(req, res) {
     try {
       const updatedLocation = await LocationService.updateLocation(
@@ -59,7 +55,6 @@ class LocationController {
     }
   }
 
-  // Usuń lokalizację
   static async deleteLocation(req, res) {
     try {
       await LocationService.deleteLocation(req.params.id);

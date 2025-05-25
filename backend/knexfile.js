@@ -1,6 +1,6 @@
 module.exports = {
   development: {
-    client: "pg", // Używamy PostgreSQL
+    client: "pg",
     connection: {
       host: "127.0.0.1",
       port: "5432",
@@ -16,16 +16,16 @@ module.exports = {
     },
   },
   test: {
-    client: "sqlite3", // Używamy SQLite dla testów
+    client: "sqlite3",
     connection: {
-      filename: ":memory:", // Baza danych w pamięci
+      filename: ":memory:",
     },
-    useNullAsDefault: true, // Wymagane dla SQLite
+    useNullAsDefault: true,
     migrations: {
-      directory: "./migrations", // Używamy tych samych migracji
+      directory: "./migrations",
     },
     seeds: {
-      directory: "./seeds", // Opcjonalnie, jeśli chcesz załadować dane testowe
+      directory: "./seeds",
     },
   },
 };

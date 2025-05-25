@@ -42,16 +42,14 @@ class UserService {
       role_id,
     });
 
-    // Wysyłanie powiadomienia po pomyślnym utworzeniu użytkownika
     if (newUser) {
-      // Przygotowujemy dane, które chcemy wysłać w powiadomieniu
       const notificationData = {
-        userId: newUser.user_id, // Zakładając, że user_id jest zwracane
+        userId: newUser.user_id,
         email: newUser.email,
         firstName: newUser.first_name,
         registrationDate: new Date().toISOString(),
       };
-      // Nie czekamy na wynik wysłania (fire and forget)
+
       sendUserRegistrationNotification(notificationData).catch(console.error);
     }
 

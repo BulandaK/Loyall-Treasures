@@ -1,7 +1,6 @@
 const DiscountCategoryService = require("../services/discountCategoryService");
 
 class DiscountCategoryController {
-  // Pobierz wszystkie kategorie
   static async getAllCategories(req, res) {
     try {
       const categories = await DiscountCategoryService.getAllCategories();
@@ -25,7 +24,6 @@ class DiscountCategoryController {
     }
   }
 
-  // Dodaj nową kategorię
   static async createCategory(req, res) {
     try {
       const newCategory = await DiscountCategoryService.createCategory(

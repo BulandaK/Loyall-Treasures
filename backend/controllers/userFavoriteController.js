@@ -1,7 +1,6 @@
 const UserFavoriteDAO = require("../dao/userFavoriteDAO");
 
 class UserFavoriteController {
-  // Pobierz ulubione zniżki użytkownika
   static async getFavoritesByUser(req, res) {
     try {
       const favorites = await UserFavoriteDAO.findFavoritesByUser(
@@ -13,7 +12,6 @@ class UserFavoriteController {
     }
   }
 
-  // Dodaj zniżkę do ulubionych
   static async addFavorite(req, res) {
     try {
       const newFavorite = await UserFavoriteDAO.addFavorite(req.body);
@@ -23,7 +21,6 @@ class UserFavoriteController {
     }
   }
 
-  // Usuń zniżkę z ulubionych
   static async removeFavorite(req, res) {
     try {
       const rowsDeleted = await UserFavoriteDAO.removeFavorite(

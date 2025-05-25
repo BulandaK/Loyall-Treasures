@@ -38,7 +38,6 @@ const adminToken = generateToken({
 describe("LocationController", () => {
   describe("getAllLocations", () => {
     it("should return all locations", async () => {
-      // Dodaj miasto
       const city = await knex("cities")
         .insert({
           city_name: "Test City",
@@ -47,7 +46,6 @@ describe("LocationController", () => {
         })
         .returning("*");
 
-      // Dodaj lokalizacje
       await knex("locations").insert([
         {
           name: "Location 1",
@@ -155,13 +153,11 @@ describe("LocationController", () => {
     });
 
     it("should return 409 if location with same name exists", async () => {
-      // Najpierw tworzymy lokalizację
       await knex("locations").insert({
         name: "Existing Location",
         address: "Test Address",
       });
 
-      // Próbujemy utworzyć lokalizację o tej samej nazwie
       const response = await request(app)
         .post("/api/locations")
         .set("Authorization", `Bearer ${adminToken}`)

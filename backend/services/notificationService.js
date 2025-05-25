@@ -12,15 +12,13 @@ async function connectRabbitMQ() {
     const connection = await amqp.connect(RABBITMQ_URL);
     channel = await connection.createChannel();
 
-    // Deklaracja kolejki (upewnienie się, że istnieje)
-    // durable: true - kolejka przetrwa restart brokera
     await channel.assertQueue(USER_REGISTRATION_QUEUE, { durable: true });
 
     console.log("Successfully connected to RabbitMQ and ensured queue exists.");
     return channel;
   } catch (error) {
     console.error("Failed to connect to RabbitMQ:", error);
-    // Możesz dodać logikę ponawiania połączenia lub rzucić błąd dalej
+
     throw error;
   }
 }
@@ -31,7 +29,6 @@ async function sendUserRegistrationNotification(userData) {
   }
 
   try {
-    // persistent: true - wiadomość przetrwa restart brokera (jeśli kolejka jest durable)
     channel.sendToQueue(
       USER_REGISTRATION_QUEUE,
       Buffer.from(JSON.stringify(userData)),
@@ -42,7 +39,6 @@ async function sendUserRegistrationNotification(userData) {
     );
   } catch (error) {
     console.error("Error sending notification to RabbitMQ:", error);
-    // Tutaj można dodać logikę fallback lub ponownego wysłania
   }
 }
 

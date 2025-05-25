@@ -5,32 +5,29 @@ const jwt = require("jsonwebtoken");
 
 let knex;
 
-// Funkcja pomocnicza do generowania tokenów JWT
 const generateToken = (user) => {
   return jwt.sign(
-    { id: user.user_id, email: user.email, role_id: user.role_id }, // Payload
-    process.env.JWT_SECRET, // Klucz JWT
-    { expiresIn: "1h" } // Czas wygaśnięcia
+    { id: user.user_id, email: user.email, role_id: user.role_id },
+    process.env.JWT_SECRET,
+    { expiresIn: "1h" }
   );
 };
 
 beforeAll(async () => {
-  process.env.NODE_ENV = "test"; // Ustawiamy środowisko na 'test'
-  knex = setupDB(); // Inicjalizujemy połączenie z bazą danych testową
-  await knex.migrate.latest(); // Uruchamiamy migracje
-  await knex.raw("PRAGMA foreign_keys = ON"); // Włączamy klucze obce dla SQLite3
+  process.env.NODE_ENV = "test";
+  knex = setupDB();
+  await knex.migrate.latest();
+  await knex.raw("PRAGMA foreign_keys = ON");
 });
 
 afterAll(async () => {
-  await knex.destroy(); // Zamykamy połączenie z bazą danych
+  await knex.destroy();
 });
 
 beforeEach(async () => {
-  // Czyszczenie tabeli przed każdym testem
   await knex("users").truncate();
   await knex("user_roles").truncate();
 
-  // Wstawiamy dane testowe dla ról
   await knex("user_roles").insert([
     { role_id: 1, role_name: "Admin", description: "Administrator role" },
     { role_id: 2, role_name: "User", description: "Regular user role" },
@@ -40,7 +37,6 @@ beforeEach(async () => {
 describe("UserController", () => {
   describe("getAllUsers", () => {
     it("should return all users", async () => {
-      // Wstawiamy dane testowe do bazy
       await knex("users").insert([
         {
           username: "user1",
@@ -64,12 +60,10 @@ describe("UserController", () => {
         email: "user1@example.com",
         role_id: 1,
       });
-      // Wykonujemy żądanie HTTP
       const response = await request(app)
         .get("/api/users")
         .set("Authorization", `Bearer ${adminToken}`);
 
-      // Sprawdzamy odpowiedź
       expect(response.status).toBe(200);
       expect(response.body).toHaveLength(2);
       expect(response.body).toEqual(
@@ -83,7 +77,6 @@ describe("UserController", () => {
 
   describe("getUserById", () => {
     it("should return a user by ID", async () => {
-      // Wstawiamy dane testowe do bazy
       const insertedUser = await knex("users")
         .insert(
           {
@@ -99,19 +92,16 @@ describe("UserController", () => {
         .returning("user_id");
       const userId = insertedUser[0]?.user_id || insertedUser[0];
 
-      // Generujemy token JWT dla admina
       const adminToken = generateToken({
         user_id: userId,
         email: "user1@example.com",
         role_id: 1,
       });
 
-      // Wykonujemy żądanie HTTP
       const response = await request(app)
         .get(`/api/users/${userId}`)
         .set("Authorization", `Bearer ${adminToken}`);
 
-      // Sprawdzamy odpowiedź
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty("email", "user1@example.com");
     });
@@ -143,14 +133,11 @@ describe("UserController", () => {
         role_id: 2,
       };
 
-      // Wykonujemy żądanie HTTP
       const response = await request(app).post("/api/users").send(newUser);
 
-      // Sprawdzamy odpowiedź
       expect(response.status).toBe(201);
       expect(response.body.user).toHaveProperty("email", "newuser@example.com");
 
-      // Sprawdzamy, czy dane zostały zapisane w bazie
       const userInDB = await knex("users")
         .where({ email: "newuser@example.com" })
         .first();
@@ -159,7 +146,6 @@ describe("UserController", () => {
     });
 
     it("should return 422 if email already exists", async () => {
-      // Wstawiamy użytkownika do bazy
       await knex("users").insert({
         username: "existinguser",
         email: "duplicate@example.com",
@@ -169,17 +155,15 @@ describe("UserController", () => {
         role_id: 1,
       });
 
-      // Próba dodania użytkownika z tym samym emailem
       const response = await request(app).post("/api/users").send({
         username: "newuser",
-        email: "duplicate@example.com", // Ten sam email
+        email: "duplicate@example.com",
         password: "password123",
         first_name: "Jane",
         last_name: "Smith",
         role_id: 2,
       });
 
-      // Sprawdzamy odpowiedź
       expect(response.status).toBe(422);
       expect(response.body).toHaveProperty("message", "Email must be unique");
     });
@@ -197,7 +181,6 @@ describe("UserController", () => {
 
   describe("loginUser", () => {
     it("should log in a user and return a token", async () => {
-      // Wstawiamy użytkownika do bazy
       const hashedPassword = await require("bcrypt").hash("password123", 10);
       await knex("users").insert({
         username: "user1",
@@ -208,13 +191,11 @@ describe("UserController", () => {
         role_id: 1,
       });
 
-      // Wykonujemy żądanie HTTP
       const response = await request(app).post("/api/users/login").send({
         email: "user1@example.com",
         password: "password123",
       });
 
-      // Sprawdzamy odpowiedź
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty("token");
     });
@@ -230,7 +211,6 @@ describe("UserController", () => {
     });
 
     it("should return 401 if password is invalid", async () => {
-      // Wstawiamy użytkownika do bazy
       const hashedPassword = await require("bcrypt").hash("password123", 10);
       await knex("users").insert({
         username: "user1",
@@ -241,7 +221,6 @@ describe("UserController", () => {
         role_id: 1,
       });
 
-      // Wykonujemy żądanie HTTP
       const response = await request(app).post("/api/users/login").send({
         email: "user1@example.com",
         password: "wrongpassword",
@@ -254,7 +233,6 @@ describe("UserController", () => {
 
   describe("updateUser", () => {
     it("should update a user", async () => {
-      // Wstawiamy użytkownika do bazy
       const insertedUser = await knex("users")
         .insert(
           {
@@ -275,13 +253,12 @@ describe("UserController", () => {
         email: "user1@example.com",
         role_id: 1,
       });
-      // Wykonujemy żądanie HTTP
+
       const response = await request(app)
         .put(`/api/users/${userId}`)
         .set("Authorization", `Bearer ${adminToken}`)
         .send({ first_name: "Updated" });
 
-      // Sprawdzamy odpowiedź
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty("first_name", "Updated");
     });
@@ -289,7 +266,6 @@ describe("UserController", () => {
 
   describe("deleteUser", () => {
     it("should delete a user", async () => {
-      // Wstawiamy użytkownika do bazy
       const insertedUser = await knex("users")
         .insert(
           {
@@ -310,18 +286,17 @@ describe("UserController", () => {
         email: "user1@example.com",
         role_id: 1,
       });
-      // Wykonujemy żądanie HTTP
+
       const response = await request(app)
         .delete(`/api/users/${userId}`)
         .set("Authorization", `Bearer ${adminToken}`);
-      // Sprawdzamy odpowiedź
+
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty(
         "message",
         "User deleted successfully"
       );
 
-      // Sprawdzamy, czy użytkownik został usunięty z bazy
       const userInDB = await knex("users").where({ user_id: userId }).first();
       expect(userInDB).toBeUndefined();
     });

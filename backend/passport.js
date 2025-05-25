@@ -4,13 +4,13 @@ const UserDAO = require("./dao/userDAO");
 
 const opts = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-  secretOrKey: process.env.JWT_SECRET, // Ustaw klucz JWT w pliku .env
+  secretOrKey: process.env.JWT_SECRET,
 };
 
 passport.use(
   new JwtStrategy(opts, async (jwtPayload, done) => {
     try {
-      const user = await UserDAO.findById(jwtPayload.id); // Pobierz użytkownika z bazy
+      const user = await UserDAO.findById(jwtPayload.id);
       if (user) {
         return done(null, user);
       } else {

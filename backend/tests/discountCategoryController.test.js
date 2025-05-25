@@ -6,18 +6,17 @@ const jwt = require("jsonwebtoken");
 let knex;
 
 beforeAll(async () => {
-  process.env.NODE_ENV = "test"; // Ustawiamy środowisko na 'test'
-  knex = setupDB(); // Inicjalizujemy połączenie z bazą danych testową
-  await knex.migrate.latest(); // Uruchamiamy migracje
-  await knex.raw("PRAGMA foreign_keys = ON"); // Włączamy klucze obce dla SQLite3
+  process.env.NODE_ENV = "test";
+  knex = setupDB();
+  await knex.migrate.latest();
+  await knex.raw("PRAGMA foreign_keys = ON");
 });
 
 afterAll(async () => {
-  await knex.destroy(); // Zamykamy połączenie z bazą danych
+  await knex.destroy();
 });
 
 beforeEach(async () => {
-  // Czyszczenie tabeli przed każdym testem
   await knex("discount_categories").truncate();
 });
 
@@ -32,22 +31,19 @@ const generateToken = (user) => {
 const adminToken = generateToken({
   id: 1,
   email: "admin@example.com",
-  role_id: 1, // Rola admina
+  role_id: 1,
 });
 
 describe("DiscountCategoryController", () => {
   describe("getAllCategories", () => {
     it("should return all categories", async () => {
-      // Wstawiamy dane testowe do bazy
       await knex("discount_categories").insert([
         { name: "Category 1", description: "Description 1" },
         { name: "Category 2", description: "Description 2" },
       ]);
 
-      // Wykonujemy żądanie HTTP
       const response = await request(app).get("/api/categories");
 
-      // Sprawdzamy odpowiedź
       expect(response.status).toBe(200);
       expect(response.body).toHaveLength(2);
       expect(response.body).toEqual(
@@ -59,12 +55,10 @@ describe("DiscountCategoryController", () => {
     });
 
     it("should return an empty array if no categories exist", async () => {
-      // Wykonujemy żądanie HTTP bez danych w bazie
       const response = await request(app)
         .get("/api/categories")
         .set("Authorization", `Bearer ${adminToken}`);
 
-      // Sprawdzamy odpowiedź
       expect(response.status).toBe(200);
       expect(response.body).toEqual([]);
     });
@@ -77,18 +71,15 @@ describe("DiscountCategoryController", () => {
         description: "Test Description",
       };
 
-      // Wykonujemy żądanie HTTP
       const response = await request(app)
         .post("/api/categories")
         .set("Authorization", `Bearer ${adminToken}`)
         .send(newCategory);
 
-      // Sprawdzamy odpowiedź
       expect(response.status).toBe(201);
       expect(response.body).toHaveProperty("category_id");
       expect(response.body.name).toBe(newCategory.name);
 
-      // Sprawdzamy, czy dane zostały zapisane w bazie
       const categoryInDB = await knex("discount_categories")
         .where({ category_id: response.body.category_id })
         .first();
@@ -96,13 +87,11 @@ describe("DiscountCategoryController", () => {
     });
 
     it("should return 400 if name is missing", async () => {
-      // Wykonujemy żądanie HTTP bez wymaganych pól
       const response = await request(app)
         .post("/api/categories")
         .set("Authorization", `Bearer ${adminToken}`)
         .send({});
 
-      // Sprawdzamy odpowiedź
       expect(response.status).toBe(400);
       expect(response.body).toHaveProperty("message", "Valid name is required");
     });
@@ -128,13 +117,11 @@ describe("DiscountCategoryController", () => {
     });
 
     it("should return 409 if category with same name exists", async () => {
-      // Najpierw tworzymy kategorię
       await knex("discount_categories").insert({
         name: "Existing Category",
         description: "Test Description",
       });
 
-      // Próbujemy utworzyć kategorię o tej samej nazwie
       const response = await request(app)
         .post("/api/categories")
         .set("Authorization", `Bearer ${adminToken}`)

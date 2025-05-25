@@ -1,7 +1,6 @@
 const DiscountRating = require("../models/discountRatingModel");
 
 class DiscountRatingController {
-  // Pobierz oceny dla konkretnej zniżki
   static async getRatingsByDiscount(req, res) {
     try {
       const ratings = await DiscountRating.query().where(
@@ -14,7 +13,6 @@ class DiscountRatingController {
     }
   }
 
-  // Dodaj nową ocenę
   static async addRating(req, res) {
     try {
       const newRating = await DiscountRating.query().insert(req.body);
@@ -24,7 +22,6 @@ class DiscountRatingController {
     }
   }
 
-  // Usuń ocenę
   static async deleteRating(req, res) {
     try {
       const rowsDeleted = await DiscountRating.query().deleteById(

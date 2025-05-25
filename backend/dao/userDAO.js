@@ -11,7 +11,7 @@ class UserDAO {
 
   static async existsByEmail(email) {
     const user = await User.query().findOne({ email });
-    return !!user; // Zwraca true, jeśli użytkownik istnieje
+    return !!user;
   }
 
   static async findByUsername(username) {
@@ -40,7 +40,7 @@ class UserDAO {
 
   static async countUsers() {
     const result = await User.query().count("user_id as count");
-    return result[0].count; // Zwraca liczbę użytkowników
+    return result[0].count;
   }
 
   static async deleteAll() {

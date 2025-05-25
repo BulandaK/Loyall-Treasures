@@ -1,4 +1,4 @@
-require("dotenv").config({ path: "../.env" }); // Załaduj zmienne środowiskowe, jeśli worker jest w innym katalogu
+require("dotenv").config({ path: "../.env" });
 const amqp = require("amqplib");
 
 const RABBITMQ_URL = process.env.RABBITMQ_URL || "amqp://localhost";
@@ -11,8 +11,6 @@ async function startWorker() {
 
     await channel.assertQueue(USER_REGISTRATION_QUEUE, { durable: true });
 
-    // prefetch(1) - worker będzie pobierał tylko jedną wiadomość na raz
-    // Dopóki nie potwierdzi przetworzenia, nie dostanie kolejnej.
     channel.prefetch(1);
 
     console.log(
@@ -27,38 +25,29 @@ async function startWorker() {
           console.log(`[.] Received user registration data: ${userData.email}`);
 
           try {
-            // Symulacja wysyłania emaila
             console.log(
               `Simulating sending welcome email to ${userData.email} for user ${userData.firstName}...`
             );
-            // Tutaj umieściłbyś logikę wysyłania rzeczywistego emaila
-            // np. używając nodemailer
             // await sendEmail(userData.email, "Welcome to Loyall Treasures!", `Hello ${userData.firstName}, ...`);
 
-            // Symulacja czasu przetwarzania
             await new Promise((resolve) => setTimeout(resolve, 2000));
 
             console.log(`[x] Processed notification for ${userData.email}`);
-            channel.ack(msg); // Potwierdzenie przetworzenia wiadomości
+            channel.ack(msg);
           } catch (processingError) {
             console.error(
               `Error processing message for ${userData.email}:`,
               processingError
             );
-            // Zdecydowanie, czy wiadomość powinna wrócić do kolejki (nack z requeue)
-            // czy zostać odrzucona (nack bez requeue lub ack, jeśli nie da się jej przetworzyć)
-            // Na przykład, jeśli błąd jest przejściowy:
-            // channel.nack(msg, false, true);
-            // Jeśli błąd jest permanentny (np. zły format danych):
-            channel.nack(msg, false, false); // Wiadomość trafi do Dead Letter Exchange (jeśli skonfigurowano) lub zostanie odrzucona
+            channel.nack(msg, false, false);
           }
         }
       },
-      { noAck: false } // noAck: false - ręczne potwierdzanie wiadomości
+      { noAck: false }
     );
   } catch (error) {
     console.error("Worker failed to start or connect to RabbitMQ:", error);
-    process.exit(1); // Zakończ proces workera, jeśli nie może się połączyć
+    process.exit(1);
   }
 }
 

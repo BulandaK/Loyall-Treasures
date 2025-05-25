@@ -15,7 +15,7 @@ const options = {
       },
     ],
   },
-  apis: ["./routes/*.js"], // Ścieżka do plików z definicjami endpointów
+  apis: ["./routes/*.js"],
 };
 
 const specs = swaggerJsdoc(options);

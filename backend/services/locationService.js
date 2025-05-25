@@ -29,7 +29,6 @@ class LocationService {
     try {
       const { name, address } = locationData;
 
-      // Walidacja wymaganych pól
       if (!name || typeof name !== "string" || name.trim().length === 0) {
         throw new Error("Valid name is required");
       }
@@ -42,7 +41,6 @@ class LocationService {
         throw new Error("Valid address is required");
       }
 
-      // Sprawdź czy lokalizacja o takiej nazwie już istnieje
       const existingLocation = await Location.query()
         .where("name", name.trim())
         .first();
@@ -51,7 +49,6 @@ class LocationService {
         throw new Error("Location with this name already exists");
       }
 
-      // Przygotuj dane do wstawienia
       const data = {
         name: name.trim(),
         address: address.trim(),

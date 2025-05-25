@@ -1,7 +1,6 @@
 const UserService = require("../services/userService");
 
 class UserController {
-  // Pobierz wszystkich użytkowników
   static async getAllUsers(req, res) {
     try {
       const users = await UserService.getAllUsers();
@@ -13,7 +12,6 @@ class UserController {
     }
   }
 
-  // Pobierz użytkownika po ID
   static async getUserById(req, res) {
     try {
       const user = await UserService.getUserById(req.params.id);
@@ -25,7 +23,6 @@ class UserController {
     }
   }
 
-  // Dodaj nowego użytkownika
   static async createUser(req, res) {
     try {
       const newUser = await UserService.createUser(req.body);
@@ -39,7 +36,6 @@ class UserController {
     }
   }
 
-  // Zaloguj użytkownika
   static async loginUser(req, res) {
     try {
       const { email, password } = req.body;
@@ -54,7 +50,6 @@ class UserController {
     }
   }
 
-  // Zaktualizuj użytkownika
   static async updateUser(req, res) {
     try {
       const updatedUser = await UserService.updateUser(req.params.id, req.body);
@@ -66,7 +61,6 @@ class UserController {
     }
   }
 
-  // Usuń użytkownika
   static async deleteUser(req, res) {
     try {
       await UserService.deleteUser(req.params.id);

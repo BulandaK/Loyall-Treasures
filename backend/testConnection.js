@@ -10,7 +10,7 @@ async function testConnection() {
   } catch (error) {
     console.error("Database connection failed:", error);
   } finally {
-    knex.destroy(); // Zamknij połączenie
+    knex.destroy();
   }
 }
 

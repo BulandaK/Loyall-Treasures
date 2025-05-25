@@ -26,16 +26,15 @@ describe("UserFavoriteController", () => {
         }),
       });
 
-      // Generujemy token JWT dla użytkownika
       const userToken = generateToken({
         id: 1,
         email: "user@example.com",
-        role_id: 2, // Rola użytkownika
+        role_id: 2,
       });
 
       const response = await request(app)
         .get("/api/favorites/users/1")
-        .set("Authorization", `Bearer ${userToken}`); // Dodajemy token;
+        .set("Authorization", `Bearer ${userToken}`);
 
       expect(response.status).toBe(200);
 
@@ -58,7 +57,6 @@ describe("UserFavoriteController", () => {
         }),
       });
 
-      // Generujemy token JWT dla użytkownika
       const userToken = generateToken({
         id: 1,
         email: "user@example.com",
@@ -85,7 +83,6 @@ describe("UserFavoriteController", () => {
         insert: jest.fn().mockResolvedValue(mockInsertedFavorite),
       });
 
-      // Generujemy token JWT dla użytkownika
       const userToken = generateToken({
         id: 1,
         email: "user@example.com",
@@ -94,7 +91,7 @@ describe("UserFavoriteController", () => {
 
       const response = await request(app)
         .post("/api/favorites")
-        .set("Authorization", `Bearer ${userToken}`) // Dodajemy token
+        .set("Authorization", `Bearer ${userToken}`)
         .send(newFavorite);
 
       expect(response.status).toBe(201);
@@ -117,7 +114,6 @@ describe("UserFavoriteController", () => {
         insert: jest.fn().mockRejectedValue(new Error("Database error")),
       });
 
-      // Generujemy token JWT dla użytkownika
       const userToken = generateToken({
         id: 1,
         email: "user@example.com",
@@ -144,7 +140,6 @@ describe("UserFavoriteController", () => {
         }),
       });
 
-      // Generujemy token JWT dla użytkownika
       const userToken = generateToken({
         id: 1,
         email: "user@example.com",
@@ -178,7 +173,6 @@ describe("UserFavoriteController", () => {
         }),
       });
 
-      // Generujemy token JWT dla użytkownika
       const userToken = generateToken({
         id: 1,
         email: "user@example.com",

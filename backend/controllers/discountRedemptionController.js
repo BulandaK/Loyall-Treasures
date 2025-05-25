@@ -1,7 +1,6 @@
 const DiscountRedemption = require("../models/discountRedemptionModel");
 
 class DiscountRedemptionController {
-  // Pobierz historię odebranych zniżek dla użytkownika
   static async getRedemptionsByUser(req, res) {
     try {
       const redemptions = await DiscountRedemption.query()
@@ -13,7 +12,6 @@ class DiscountRedemptionController {
     }
   }
 
-  // Dodaj nową historię odebrania zniżki
   static async addRedemption(req, res) {
     try {
       const newRedemption = await DiscountRedemption.query().insert(req.body);
@@ -25,7 +23,6 @@ class DiscountRedemptionController {
     }
   }
 
-  // Usuń historię odebrania zniżki - nieużywane w tym scenariuszu, ale zostawiam
   static async deleteRedemption(req, res) {
     try {
       const rowsDeleted = await DiscountRedemption.query().deleteById(
@@ -40,7 +37,6 @@ class DiscountRedemptionController {
     }
   }
 
-  // NOWA METODA: Sprawdź status odebrania zniżki
   static async getRedemptionStatus(req, res) {
     try {
       const { userId, discountId } = req.params;
@@ -54,16 +50,14 @@ class DiscountRedemptionController {
           .status(200)
           .json({ redeemed: true, redeemed_at: redemption.redeemed_at });
       } else {
-        res.status(200).json({ redeemed: false }); // Zwracamy 200 z informacją, że nie odebrano
+        res.status(200).json({ redeemed: false });
       }
     } catch (error) {
       console.error("Error fetching redemption status:", error);
-      res
-        .status(500)
-        .json({
-          message: "Error fetching redemption status",
-          error: error.message,
-        });
+      res.status(500).json({
+        message: "Error fetching redemption status",
+        error: error.message,
+      });
     }
   }
 }
