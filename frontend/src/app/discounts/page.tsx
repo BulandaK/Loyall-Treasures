@@ -6,7 +6,9 @@ import Navigation from "@/components/Navigation";
 import { FaFilter } from "react-icons/fa";
 import DiscountDetailModal from "@/components/DiscountDetailModal";
 import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation"; // Dodaj, jeśli chcesz przekierowywać
 
+// --- Definicje interfejsów (mogą być w osobnym pliku types.ts) ---
 interface LocationFromAPI {
   location_id: number;
   name: string;
@@ -26,8 +28,8 @@ interface Discount {
   discount_id: number;
   title: string;
   description: string;
-  normal_price: number;
-  discount_price: number;
+  normal_price: number | string; // Zezwalamy na string, backend może tak zwracać
+  discount_price: number | string; // Zezwalamy na string
   percentage_discount: number;
   start_date: string;
   end_date: string;
@@ -48,8 +50,19 @@ interface Redemption {
   redeemed_at: string;
 }
 
+interface UserFavoriteFromAPI {
+  // Interfejs dla odpowiedzi z API ulubionych
+  favorite_id: number;
+  user_id: number;
+  discount_id: number;
+  added_at: string;
+  // Możesz tu dodać obiekt `discount`, jeśli API go zwraca przy pobieraniu ulubionych
+}
+// --- Koniec definicji interfejsów ---
+
 const DiscountsPage = () => {
   const { user } = useAuth();
+  const router = useRouter();
   const [discounts, setDiscounts] = useState<Discount[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -63,10 +76,15 @@ const DiscountsPage = () => {
   const [redeemedDiscountIds, setRedeemedDiscountIds] = useState<Set<number>>(
     new Set()
   );
+  const [favoriteDiscountIds, setFavoriteDiscountIds] = useState<Set<number>>(
+    new Set()
+  ); // Do śledzenia ulubionych
 
+  // Pobieranie zniżek
   useEffect(() => {
     const fetchDiscounts = async () => {
       setLoading(true);
+      setError(null);
       try {
         const response = await fetch("http://localhost:8080/api/discounts");
         if (!response.ok) {
@@ -81,49 +99,70 @@ const DiscountsPage = () => {
         setDiscounts(formattedDiscounts);
 
         const uniqueCategories = Array.from(
-          new Set(data.map((discount: Discount) => discount.category.name))
+          new Set(data.map((d: Discount) => d.category.name))
         ) as string[];
         setCategories(uniqueCategories);
-      } catch (err) {
-        setError("Wystąpił błąd podczas ładowania zniżek");
+      } catch (err: any) {
+        setError(err.message || "Wystąpił błąd podczas ładowania zniżek");
         console.error(err);
       } finally {
         setLoading(false);
       }
     };
-
     fetchDiscounts();
   }, []);
 
+  // Pobieranie odebranych zniżek i ulubionych zniżek użytkownika
   useEffect(() => {
-    const fetchRedeemedDiscounts = async () => {
-      if (user && user.id && user.token) {
+    const fetchDataForUser = async () => {
+      if (user?.id && user.token) {
+        // Pobieranie odebranych zniżek
         try {
-          const response = await fetch(
+          const redeemedResponse = await fetch(
             `http://localhost:8080/api/redemptions/users/${user.id}`,
             {
-              headers: {
-                Authorization: `Bearer ${user.token}`,
-              },
+              headers: { Authorization: `Bearer ${user.token}` },
             }
           );
-          if (response.ok) {
-            const redeemed: Redemption[] = await response.json();
-            const ids = new Set(redeemed.map((r) => r.discount_id));
-            setRedeemedDiscountIds(ids);
+          if (redeemedResponse.ok) {
+            const redeemed: Redemption[] = await redeemedResponse.json();
+            setRedeemedDiscountIds(new Set(redeemed.map((r) => r.discount_id)));
           } else {
             console.error("Failed to fetch redeemed discounts");
           }
         } catch (error) {
           console.error("Error fetching redeemed discounts:", error);
         }
+
+        // Pobieranie ulubionych zniżek
+        try {
+          const favoritesResponse = await fetch(
+            `http://localhost:8080/api/favorites/users/${user.id}`,
+            {
+              headers: { Authorization: `Bearer ${user.token}` },
+            }
+          );
+          if (favoritesResponse.ok) {
+            const favData: UserFavoriteFromAPI[] =
+              await favoritesResponse.json();
+            setFavoriteDiscountIds(
+              new Set(favData.map((fav) => fav.discount_id))
+            );
+          } else {
+            console.error("Failed to fetch favorite discounts");
+          }
+        } catch (error) {
+          console.error("Error fetching favorite discounts:", error);
+        }
       } else {
+        // Resetuj stany, jeśli użytkownik nie jest zalogowany
         setRedeemedDiscountIds(new Set());
+        setFavoriteDiscountIds(new Set());
       }
     };
 
-    fetchRedeemedDiscounts();
-  }, [user]);
+    fetchDataForUser();
+  }, [user]); // Uruchom ponownie, gdy zmieni się użytkownik
 
   const handleOpenModal = (discount: Discount) => {
     setSelectedDiscount(discount);
@@ -141,6 +180,22 @@ const DiscountsPage = () => {
         new Set(prevIds).add(redeemedDiscountId)
       );
     }
+  };
+
+  // Callback do aktualizacji stanu ulubionych po kliknięciu serca w DiscountCard lub DiscountDetailModal
+  const handleFavoriteStatusChange = (
+    discountId: number,
+    isNowFavorite: boolean
+  ) => {
+    setFavoriteDiscountIds((prevIds) => {
+      const newSet = new Set(prevIds);
+      if (isNowFavorite) {
+        newSet.add(discountId);
+      } else {
+        newSet.delete(discountId);
+      }
+      return newSet;
+    });
   };
 
   const filteredDiscounts =
@@ -203,8 +258,8 @@ const DiscountsPage = () => {
               key={discount.discount_id}
               title={discount.title}
               description={discount.description}
-              normalPrice={discount.normal_price}
-              discountPrice={discount.discount_price}
+              normalPrice={discount.normal_price as number} // Zakładamy, że po formatowaniu to liczba
+              discountPrice={discount.discount_price as number} // Zakładamy, że po formatowaniu to liczba
               percentageDiscount={discount.percentage_discount}
               locationName={discount.location.name}
               startDate={discount.start_date}
@@ -214,6 +269,11 @@ const DiscountsPage = () => {
               isRedeemed={
                 user ? redeemedDiscountIds.has(discount.discount_id) : false
               }
+              discountId={discount.discount_id} // **WAŻNE: Przekazanie ID zniżki**
+              initialIsFavorite={
+                user ? favoriteDiscountIds.has(discount.discount_id) : false
+              }
+              onFavoriteToggle={handleFavoriteStatusChange}
             />
           ))}
         </div>
@@ -233,6 +293,10 @@ const DiscountsPage = () => {
           isRedeemed={
             user ? redeemedDiscountIds.has(selectedDiscount.discount_id) : false
           }
+          initialIsFavorite={
+            user ? favoriteDiscountIds.has(selectedDiscount.discount_id) : false
+          }
+          onFavoriteToggle={handleFavoriteStatusChange}
         />
       )}
     </div>

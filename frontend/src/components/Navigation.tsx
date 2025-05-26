@@ -25,10 +25,13 @@ const Navigation = () => {
           >
             Zniżki
           </Link>
-          <Link href="#" className="text-gray-700 hover:text-green-600">
+          <Link
+            href="/favourites"
+            className="text-gray-700 hover:text-green-600"
+          >
             {" "}
             {/* Placeholder */}
-            Powiadomienia
+            Ulubione
           </Link>
           <Link
             href="/contact-us"
@@ -58,7 +61,7 @@ const Navigation = () => {
                 onClick={logout}
                 className="bg-red-600 text-white px-3 py-2 sm:px-4 rounded hover:bg-red-700 text-sm sm:text-base"
               >
-                Logout
+                Wyloguj
               </button>
             </>
           ) : (
