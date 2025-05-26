@@ -9,7 +9,7 @@ import {
   FaCheckCircle,
   FaHeart,
   FaRegHeart,
-  FaSpinner, // Dodano ikonę ładowania
+  FaSpinner,
 } from "react-icons/fa";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
@@ -18,7 +18,7 @@ interface LocationFromAPI {
   location_id: number;
   name: string;
   address: string;
-  city_id: number; // Zakładam, że te pola mogą być potrzebne
+  city_id: number;
   latitude: number;
   longitude: number;
   phone: string;
@@ -31,7 +31,7 @@ interface LocationFromAPI {
 interface CategoryFromAPI {
   category_id: number;
   name: string;
-  description: string; // Zakładam, że te pola mogą być potrzebne
+  description: string;
   icon: string;
 }
 
@@ -89,7 +89,7 @@ const DiscountDetailModal: React.FC<DiscountDetailModalProps> = ({
     React.useState(initialIsRedeemed);
   const [isFavorite, setIsFavorite] = useState(initialIsFavorite);
   const [isLoadingFavorite, setIsLoadingFavorite] = useState(false);
-  const [isLoadingRedeem, setIsLoadingRedeem] = useState(false); // Stan ładowania dla odbierania zniżki
+  const [isLoadingRedeem, setIsLoadingRedeem] = useState(false);
 
   React.useEffect(() => {
     setIsCurrentlyRedeemed(initialIsRedeemed);
@@ -117,27 +117,23 @@ const DiscountDetailModal: React.FC<DiscountDetailModalProps> = ({
 
     setIsLoadingRedeem(true);
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/redemptions`, // Endpoint backendu do odbierania zniżek
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${user.token}`, // Używamy tokenu zalogowanego użytkownika
-          },
-          body: JSON.stringify({
-            user_id: user.id,
-            discount_id: discount.discount_id,
-            location_id: discount.location_id, // Backend może wymagać location_id
-            // used_code: discount.promo_code || null, // Jeśli jest kod promocyjny
-          }),
-        }
-      );
+      const response = await fetch(`http://localhost:8080/api/redemptions`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.token}`,
+        },
+        body: JSON.stringify({
+          user_id: user.id,
+          discount_id: discount.discount_id,
+          location_id: discount.location_id,
+        }),
+      });
 
       if (response.ok) {
         setIsCurrentlyRedeemed(true);
         alert("Zniżka została pomyślnie odebrana!");
-        onClose(true, discount.discount_id); // Przekazujemy informację, że zniżka została odebrana
+        onClose(true, discount.discount_id);
       } else {
         const errorData = await response.json();
         alert(
@@ -181,7 +177,6 @@ const DiscountDetailModal: React.FC<DiscountDetailModalProps> = ({
         );
         if (response.ok) {
           setIsFavorite(false);
-          // alert("Usunięto z ulubionych!"); // Można odkomentować
           if (onFavoriteToggle) onFavoriteToggle(discount.discount_id, false);
         } else {
           const errorData = await response.json();
@@ -199,13 +194,11 @@ const DiscountDetailModal: React.FC<DiscountDetailModalProps> = ({
             Authorization: `Bearer ${user.token}`,
           },
           body: JSON.stringify({
-            // user_id: user.id, // Backend odczytuje user_id z tokenu, więc nie musimy wysyłać
             discount_id: discount.discount_id,
           }),
         });
         if (response.ok) {
           setIsFavorite(true);
-          // alert("Dodano do ulubionych!"); // Można odkomentować
           if (onFavoriteToggle) onFavoriteToggle(discount.discount_id, true);
         } else {
           const errorData = await response.json();
@@ -227,11 +220,8 @@ const DiscountDetailModal: React.FC<DiscountDetailModalProps> = ({
   return (
     <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4 overflow-y-auto">
       {" "}
-      {/* Zmieniono bg-opacity-50 na 60 */}
       <div className="bg-white rounded-lg p-6 md:p-8 max-w-lg w-full max-h-[95vh] overflow-y-auto shadow-xl">
         {" "}
-        {/* Zmniejszono max-w-2xl na max-w-lg, zwiększono max-h */}
-        {/* Nagłówek Modala */}
         <div className="flex justify-between items-start mb-4 sm:mb-6">
           <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mr-4 break-words">
             {discount.title}
@@ -272,13 +262,11 @@ const DiscountDetailModal: React.FC<DiscountDetailModalProps> = ({
             </button>
           </div>
         </div>
-        {/* Treść Modala */}
         <div className="space-y-3 sm:space-y-4">
           <p className="text-gray-700 text-sm sm:text-base leading-relaxed">
             {discount.description}
           </p>
 
-          {/* Sekcja cenowa */}
           <div className="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
               <div className="flex items-baseline">
@@ -365,7 +353,6 @@ const DiscountDetailModal: React.FC<DiscountDetailModalProps> = ({
             </div>
           )}
         </div>
-        {/* Stopka Modala z Akcjami */}
         <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-3">
           <button
             onClick={() => onClose()}

@@ -22,7 +22,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem; /* Odstęp między ikoną a tekstem */
+  gap: 0.5rem;
 }
 
 .social-button:hover {

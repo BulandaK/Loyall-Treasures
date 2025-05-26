@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const discountRedemptionController = require("../controllers/discountRedemptionController");
-const authMiddleware = require("../middleware/authMiddleware"); // Upewnij się, że ten middleware jest poprawnie zaimportowany
+const authMiddleware = require("../middleware/authMiddleware");
 
 /**
  * @swagger

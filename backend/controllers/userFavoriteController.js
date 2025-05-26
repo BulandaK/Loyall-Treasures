@@ -1,17 +1,14 @@
-// backend/controllers/userFavoriteController.js
-const UserFavoriteService = require("../services/userFavoriteService"); // Używamy serwisu
+const UserFavoriteService = require("../services/userFavoriteService");
 
 class UserFavoriteController {
   static async getFavoritesByUser(req, res) {
     try {
       const userId = req.params.userId;
 
-      // First check if userId is valid
       if (isNaN(parseInt(userId, 10))) {
         return res.status(400).json({ message: "Invalid User ID" });
       }
 
-      // Then check authorization
       if (req.user.id !== parseInt(userId, 10) && req.user.role_id !== 1) {
         return res.status(403).json({
           message: "Forbidden: You can only access your own favorites.",
@@ -30,7 +27,7 @@ class UserFavoriteController {
 
   static async addFavorite(req, res) {
     try {
-      const userId = parseInt(req.user.id, 10); // Pobieramy ID zalogowanego użytkownika z tokenu
+      const userId = parseInt(req.user.id, 10);
       const discountId = parseInt(req.body.discount_id, 10);
 
       if (isNaN(discountId)) {
@@ -66,8 +63,6 @@ class UserFavoriteController {
       const userId = parseInt(req.params.userId, 10);
       const discountId = parseInt(req.params.discountId, 10);
 
-      // Sprawdzenie, czy zalogowany użytkownik usuwa ulubione dla samego siebie
-      // lub czy jest administratorem (opcjonalne)
       if (req.user.id !== userId && req.user.role_id !== 1) {
         return res.status(403).json({
           message: "Forbidden: You can only remove your own favorites.",

@@ -42,11 +42,10 @@ async function sendUserRegistrationNotification(userData) {
   }
 }
 
-// Inicjalizacja połączenia przy starcie aplikacji (opcjonalnie, ale zalecane)
 connectRabbitMQ().catch(console.error);
 
 module.exports = {
   connectRabbitMQ,
   sendUserRegistrationNotification,
-  USER_REGISTRATION_QUEUE, // Eksportujemy nazwę kolejki, jeśli będzie potrzebna gdzie indziej
+  USER_REGISTRATION_QUEUE,
 };

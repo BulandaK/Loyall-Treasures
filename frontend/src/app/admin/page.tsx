@@ -317,7 +317,6 @@ const AdminPanel = () => {
       if (response.ok) {
         const newDiscount = await response.json();
 
-        // Fetch the complete discount data with relations
         const discountResponse = await fetch(
           `http://localhost:8080/api/discounts/${newDiscount.discount_id}`,
           {
@@ -384,7 +383,6 @@ const AdminPanel = () => {
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-8 text-black">Admin Panel</h1>
 
-        {/* Tabs */}
         <div className="mb-8">
           <div className="flex space-x-4 border-b">
             <button
@@ -410,7 +408,6 @@ const AdminPanel = () => {
           </div>
         </div>
 
-        {/* Users Tab */}
         {activeTab === "users" && (
           <div className="bg-white rounded-lg shadow-md p-6">
             <h2 className="text-2xl font-semibold mb-4 text-black">
@@ -492,7 +489,6 @@ const AdminPanel = () => {
           </div>
         )}
 
-        {/* Discounts Tab */}
         {activeTab === "discounts" && (
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="flex justify-between items-center mb-4">

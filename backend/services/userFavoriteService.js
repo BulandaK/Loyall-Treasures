@@ -1,4 +1,3 @@
-// backend/services/userFavoriteService.js
 const UserFavoriteDAO = require("../dao/userFavoriteDAO");
 
 class UserFavoriteService {

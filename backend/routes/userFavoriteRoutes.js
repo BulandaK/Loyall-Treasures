@@ -1,4 +1,3 @@
-// backend/routes/userFavoriteRoutes.js
 const express = require("express");
 const router = express.Router();
 const userFavoriteController = require("../controllers/userFavoriteController");

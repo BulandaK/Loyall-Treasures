@@ -8,14 +8,14 @@
 
 .input-field:focus {
   outline: none;
-  border-color: #2196f3; /* Niebieski kolor dla logowania */
+  border-color: #2196f3;
   box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
 }
 
 .login-button {
   width: 100%;
   padding: 0.75rem;
-  background-color: #2196f3; /* Niebieski kolor */
+  background-color: #2196f3;
   color: #fff;
   border: none;
   border-radius: 0.375rem;
@@ -26,7 +26,7 @@
 }
 
 .login-button:hover {
-  background-color: #1976d2; /* Ciemniejszy niebieski przy najechaniu */
+  background-color: #1976d2;
 }
 
 .social-button {
@@ -39,7 +39,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem; /* Odstęp między ikoną a tekstem */
+  gap: 0.5rem;
 }
 
 .social-button:hover {
