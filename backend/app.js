@@ -3,6 +3,7 @@ const express = require("express");
 const cors = require("cors"); // Import pakietu cors
 const dbSetup = require("./db");
 const routes = require("./routes");
+const favoriteRoutes = require("./routes/userFavoriteRoutes");
 
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpecs = require("./swagger");
@@ -30,6 +31,7 @@ app.use(passport.initialize());
 
 app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
 app.use("/api", routes);
+app.use("/api/favorites", favoriteRoutes);
 
 app.get("/", (req, res) => {
   res.status(200).json({ message: "Hello, world!" });
