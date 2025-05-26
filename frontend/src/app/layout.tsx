@@ -15,8 +15,8 @@ const roboto = Roboto({
 });
 
 export const metadata = {
-  title: "Create Account",
-  description: "Sign up for LoyAll",
+  title: "Loyall Treasures - Twoje Centrum Zniżek",
+  description: "Odkrywaj najlepsze zniżki i promocje w Loyall Treasures.",
 };
 
 export default function RootLayout({
@@ -25,9 +25,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${poppins.variable} ${roboto.variable}`}>
-      <body>
-        <AuthProvider>{children}</AuthProvider>
+    <html lang="pl" className={`${poppins.variable} ${roboto.variable}`}>
+      <body className="flex flex-col min-h-screen">
+        <AuthProvider>
+          <div className="flex-grow">{children}</div>{" "}
+        </AuthProvider>
       </body>
     </html>
   );

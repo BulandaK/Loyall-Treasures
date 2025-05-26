@@ -1,4 +1,3 @@
-// frontend/src/components/DiscountCard.tsx
 import {
   FaMapMarkerAlt,
   FaCalendarAlt,
@@ -22,8 +21,8 @@ interface DiscountCardProps {
   categoryName: string;
   onDetailsClick: () => void;
   isRedeemed: boolean;
-  discountId: number; // Kluczowe: ID zniżki
-  initialIsFavorite?: boolean; // Początkowy stan ulubionego, przekazywany z góry
+  discountId: number;
+  initialIsFavorite?: boolean;
   onFavoriteToggle?: (discountId: number, isFavorite: boolean) => void;
 }
 
@@ -40,7 +39,7 @@ const DiscountCard = ({
   onDetailsClick,
   isRedeemed,
   discountId,
-  initialIsFavorite = false, // Domyślna wartość, jeśli nie przekazano
+  initialIsFavorite = false,
   onFavoriteToggle,
 }: DiscountCardProps) => {
   const { user } = useAuth();
@@ -48,14 +47,12 @@ const DiscountCard = ({
   const [isFavorite, setIsFavorite] = useState(initialIsFavorite);
   const [isLoadingFavorite, setIsLoadingFavorite] = useState(false);
 
-  // Synchronizuj stan isFavorite z propsem initialIsFavorite, gdy się zmieni
-  // (np. gdy lista ulubionych na stronie nadrzędnej zostanie zaktualizowana)
   useEffect(() => {
     setIsFavorite(initialIsFavorite);
   }, [initialIsFavorite]);
 
   const handleToggleFavorite = async (e: React.MouseEvent) => {
-    e.stopPropagation(); // Zapobiega kliknięciu na całą kartę
+    e.stopPropagation();
     if (!user || !user.token) {
       alert("Musisz być zalogowany, aby zarządzać ulubionymi.");
       router.push("/auth/login");
@@ -63,7 +60,6 @@ const DiscountCard = ({
     }
     if (isLoadingFavorite) return;
 
-    // Sprawdzenie, czy discountId jest poprawną liczbą
     if (typeof discountId !== "number" || isNaN(discountId)) {
       console.error(
         "DiscountCard: handleToggleFavorite - discountId is invalid:",
@@ -79,7 +75,6 @@ const DiscountCard = ({
     try {
       let response;
       if (isFavorite) {
-        // Usuwanie z ulubionych
         response = await fetch(`${apiUrlBase}/users/${user.id}/${discountId}`, {
           method: "DELETE",
           headers: {
@@ -87,10 +82,9 @@ const DiscountCard = ({
           },
         });
         if (response.ok) {
-          setIsFavorite(false); // Zaktualizuj lokalny stan
-          // alert('Usunięto z ulubionych!'); // Opcjonalny alert
+          setIsFavorite(false);
           if (onFavoriteToggle) {
-            onFavoriteToggle(discountId, false); // Poinformuj komponent nadrzędny
+            onFavoriteToggle(discountId, false);
           }
         } else {
           const errorData = await response.json();
@@ -102,20 +96,18 @@ const DiscountCard = ({
           );
         }
       } else {
-        // Dodawanie do ulubionych
         response = await fetch(apiUrlBase, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${user.token}`,
           },
-          body: JSON.stringify({ discount_id: discountId }), // Backend oczekuje discount_id
+          body: JSON.stringify({ discount_id: discountId }),
         });
         if (response.ok) {
-          setIsFavorite(true); // Zaktualizuj lokalny stan
-          // alert('Dodano do ulubionych!'); // Opcjonalny alert
+          setIsFavorite(true);
           if (onFavoriteToggle) {
-            onFavoriteToggle(discountId, true); // Poinformuj komponent nadrzędny
+            onFavoriteToggle(discountId, true);
           }
         } else {
           const errorData = await response.json();
@@ -139,8 +131,8 @@ const DiscountCard = ({
     <div
       className={`bg-white rounded-lg shadow-md overflow-hidden transition-shadow duration-300 ${
         isRedeemed ? "opacity-70" : "hover:shadow-lg"
-      } relative cursor-pointer`} // Dodano cursor-pointer, jeśli cała karta jest klikalna
-      onClick={onDetailsClick} // Jeśli cała karta ma otwierać modal
+      } relative cursor-pointer`}
+      onClick={onDetailsClick}
     >
       {user && (
         <button
@@ -160,7 +152,6 @@ const DiscountCard = ({
       )}
       <div className="p-6">
         <div className="flex justify-between items-start mb-4">
-          {/* Upewniamy się, że tytuł nie jest zasłaniany przez przycisk serca */}
           <h3 className="text-xl font-bold text-gray-800 mr-10">{title}</h3>
           <span
             className={`text-white px-3 py-1 rounded-full text-sm font-semibold ${

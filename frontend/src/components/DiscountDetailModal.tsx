@@ -1,15 +1,14 @@
-// frontend/src/components/DiscountDetailModal.tsx
 "use client";
 
-import React, { useState, useEffect } from "react"; // Dodano useEffect
+import React, { useState, useEffect } from "react";
 import {
   FaCalendarAlt,
   FaMapMarkerAlt,
   FaTag,
   FaTimes,
   FaCheckCircle,
-  FaHeart, // Dodano
-  FaRegHeart, // Dodano
+  FaHeart,
+  FaRegHeart,
 } from "react-icons/fa";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
@@ -94,24 +93,17 @@ const DiscountDetailModal: React.FC<DiscountDetailModalProps> = ({
     setIsCurrentlyRedeemed(initialIsRedeemed);
   }, [initialIsRedeemed]);
 
-  // Efekt do sprawdzania, czy zniżka jest już w ulubionych
   useEffect(() => {
-    // Podobnie jak w DiscountCard, można by dodać logikę sprawdzania statusu ulubionego
-    // np. przy otwarciu modala, jeśli initialIsFavorite nie jest przekazywane.
     if (discount) {
-      // Upewnij się, że discount nie jest null
-      setIsFavorite(initialIsFavorite); // Ustawiamy na podstawie propsa
-      // Można dodać tu logikę pobierania aktualnego statusu ulubionych, jeśli initialIsFavorite nie jest wiarygodne
+      setIsFavorite(initialIsFavorite);
     }
-  }, [discount, initialIsFavorite, user]); // Dodano discount i user do zależności
+  }, [discount, initialIsFavorite, user]);
 
   if (!isOpen || !discount) {
     return null;
   }
 
-  const handleRedeemDiscount = async () => {
-    // ... (istniejąca logika)
-  };
+  const handleRedeemDiscount = async () => {};
 
   const handleToggleFavorite = async () => {
     if (!user || !user.token || !discount) {
@@ -186,7 +178,7 @@ const DiscountDetailModal: React.FC<DiscountDetailModalProps> = ({
       <div className="bg-white rounded-lg p-6 md:p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-xl">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-gray-800">{discount.title}</h2>
-          {user && ( // Przycisk serca w modalu
+          {user && (
             <button
               onClick={handleToggleFavorite}
               disabled={isLoadingFavorite}
@@ -212,7 +204,6 @@ const DiscountDetailModal: React.FC<DiscountDetailModalProps> = ({
           </button>
         </div>
 
-        {/* ... (reszta JSX bez zmian) ... */}
         <div className="space-y-4">
           <p className="text-gray-700 text-base leading-relaxed">
             {discount.description}

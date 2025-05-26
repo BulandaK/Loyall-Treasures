@@ -6,9 +6,8 @@ import DiscountCard from "@/components/DiscountCard";
 import Navigation from "@/components/Navigation";
 import DiscountDetailModal from "@/components/DiscountDetailModal";
 import { useRouter } from "next/navigation";
-import { FaHeart, FaSearch } from "react-icons/fa"; // Dodano FaSearch
+import { FaHeart, FaSearch } from "react-icons/fa";
 
-// --- Definicje interfejsów (powinny być spójne i najlepiej w osobnym pliku types.ts) ---
 interface LocationFromAPI {
   location_id: number;
   name: string;
@@ -48,9 +47,6 @@ interface UserFavoriteFromAPI {
   user_id: number;
   discount_id: number;
   added_at: string;
-  // Zakładamy, że backend NIE zwraca już pełnego obiektu discount,
-  // zgodnie z prośbą o filtrowanie po stronie klienta.
-  // Jeśli backend zwraca pełny obiekt, ten interfejs powinien to odzwierciedlać.
 }
 
 interface Redemption {
@@ -59,7 +55,6 @@ interface Redemption {
   discount_id: number;
   redeemed_at: string;
 }
-// --- Koniec definicji interfejsów ---
 
 const FavoritesPage = () => {
   const { user } = useAuth();
@@ -83,7 +78,6 @@ const FavoritesPage = () => {
   );
 
   const fetchAllDiscounts = useCallback(async () => {
-    // Ta funkcja nie powinna ustawiać błędu globalnego, jeśli jest częścią większego procesu ładowania
     try {
       const response = await fetch("http://localhost:8080/api/discounts");
       if (!response.ok) {
@@ -103,7 +97,7 @@ const FavoritesPage = () => {
       return formattedDiscounts;
     } catch (err: any) {
       console.error("Błąd pobierania wszystkich zniżek:", err);
-      // Nie ustawiamy tutaj globalnego błędu, aby fetchUserFavoriteIds mogło kontynuować
+
       return [];
     }
   }, []);
@@ -136,7 +130,7 @@ const FavoritesPage = () => {
         return ids;
       } catch (err: any) {
         console.error("Błąd pobierania ID ulubionych:", err);
-        // Nie ustawiamy tutaj globalnego błędu, aby fetchAllDiscounts mogło kontynuować
+
         return new Set<number>();
       }
     },
@@ -147,9 +141,8 @@ const FavoritesPage = () => {
     const loadData = async () => {
       if (user?.id && user.token) {
         setLoading(true);
-        setError(null); // Resetuj błąd przed próbą pobrania
+        setError(null);
 
-        // Równoległe pobieranie danych
         const [discountsResult, favIdsResult] = await Promise.allSettled([
           fetchAllDiscounts(),
           fetchUserFavoriteIds(user.token, user.id),
@@ -175,7 +168,6 @@ const FavoritesPage = () => {
           setError(
             favIdsResult.reason?.message || "Błąd pobierania ulubionych."
           );
-          // Możemy zdecydować, czy chcemy kontynuować, jeśli ulubione się nie załadują
         }
 
         if (discountsData.length > 0 && favIdsData.size > 0) {
@@ -263,12 +255,10 @@ const FavoritesPage = () => {
     });
   };
 
-  // ---- ZMIANY WIZUALNE ----
   const pageBackgroundColor =
-    "bg-gradient-to-br from-purple-50 via-pink-50 to-rose-50"; // Delikatny gradient
+    "bg-gradient-to-br from-purple-50 via-pink-50 to-rose-50";
   const headerTextColor = "text-rose-600";
   const ctaButtonColor = "bg-rose-500 hover:bg-rose-600";
-  // ---- KONIEC ZMIAN WIZUALNYCH ----
 
   if (loading) {
     return (
@@ -322,7 +312,6 @@ const FavoritesPage = () => {
             <p className="text-base mt-2">{error}</p>
             <button
               onClick={() => {
-                // Próba ponownego załadowania danych
                 if (user?.id && user.token) {
                   fetchUserFavoriteIds(user.token, user.id);
                   fetchAllDiscounts();
@@ -353,7 +342,7 @@ const FavoritesPage = () => {
               Moje Ulubione
             </h1>
           </div>
-          {/* Można dodać np. licznik ulubionych */}
+
           {displayedFavorites.length > 0 && (
             <div className="text-lg text-gray-600">
               Liczba ulubionych:{" "}
@@ -419,7 +408,7 @@ const FavoritesPage = () => {
                         : false
                     }
                     discountId={discount.discount_id}
-                    initialIsFavorite={true} // Na tej stronie wszystkie są ulubione
+                    initialIsFavorite={true}
                     onFavoriteToggle={handleFavoriteStatusChange}
                   />
                 </div>

@@ -6,9 +6,8 @@ import Navigation from "@/components/Navigation";
 import { FaFilter } from "react-icons/fa";
 import DiscountDetailModal from "@/components/DiscountDetailModal";
 import { useAuth } from "@/context/AuthContext";
-import { useRouter } from "next/navigation"; // Dodaj, jeśli chcesz przekierowywać
+import { useRouter } from "next/navigation";
 
-// --- Definicje interfejsów (mogą być w osobnym pliku types.ts) ---
 interface LocationFromAPI {
   location_id: number;
   name: string;
@@ -28,8 +27,8 @@ interface Discount {
   discount_id: number;
   title: string;
   description: string;
-  normal_price: number | string; // Zezwalamy na string, backend może tak zwracać
-  discount_price: number | string; // Zezwalamy na string
+  normal_price: number | string;
+  discount_price: number | string;
   percentage_discount: number;
   start_date: string;
   end_date: string;
@@ -51,14 +50,11 @@ interface Redemption {
 }
 
 interface UserFavoriteFromAPI {
-  // Interfejs dla odpowiedzi z API ulubionych
   favorite_id: number;
   user_id: number;
   discount_id: number;
   added_at: string;
-  // Możesz tu dodać obiekt `discount`, jeśli API go zwraca przy pobieraniu ulubionych
 }
-// --- Koniec definicji interfejsów ---
 
 const DiscountsPage = () => {
   const { user } = useAuth();
@@ -78,9 +74,8 @@ const DiscountsPage = () => {
   );
   const [favoriteDiscountIds, setFavoriteDiscountIds] = useState<Set<number>>(
     new Set()
-  ); // Do śledzenia ulubionych
+  );
 
-  // Pobieranie zniżek
   useEffect(() => {
     const fetchDiscounts = async () => {
       setLoading(true);
@@ -112,11 +107,9 @@ const DiscountsPage = () => {
     fetchDiscounts();
   }, []);
 
-  // Pobieranie odebranych zniżek i ulubionych zniżek użytkownika
   useEffect(() => {
     const fetchDataForUser = async () => {
       if (user?.id && user.token) {
-        // Pobieranie odebranych zniżek
         try {
           const redeemedResponse = await fetch(
             `http://localhost:8080/api/redemptions/users/${user.id}`,
@@ -134,7 +127,6 @@ const DiscountsPage = () => {
           console.error("Error fetching redeemed discounts:", error);
         }
 
-        // Pobieranie ulubionych zniżek
         try {
           const favoritesResponse = await fetch(
             `http://localhost:8080/api/favorites/users/${user.id}`,
@@ -155,14 +147,13 @@ const DiscountsPage = () => {
           console.error("Error fetching favorite discounts:", error);
         }
       } else {
-        // Resetuj stany, jeśli użytkownik nie jest zalogowany
         setRedeemedDiscountIds(new Set());
         setFavoriteDiscountIds(new Set());
       }
     };
 
     fetchDataForUser();
-  }, [user]); // Uruchom ponownie, gdy zmieni się użytkownik
+  }, [user]);
 
   const handleOpenModal = (discount: Discount) => {
     setSelectedDiscount(discount);
@@ -182,7 +173,6 @@ const DiscountsPage = () => {
     }
   };
 
-  // Callback do aktualizacji stanu ulubionych po kliknięciu serca w DiscountCard lub DiscountDetailModal
   const handleFavoriteStatusChange = (
     discountId: number,
     isNowFavorite: boolean
@@ -258,8 +248,8 @@ const DiscountsPage = () => {
               key={discount.discount_id}
               title={discount.title}
               description={discount.description}
-              normalPrice={discount.normal_price as number} // Zakładamy, że po formatowaniu to liczba
-              discountPrice={discount.discount_price as number} // Zakładamy, że po formatowaniu to liczba
+              normalPrice={discount.normal_price as number}
+              discountPrice={discount.discount_price as number}
               percentageDiscount={discount.percentage_discount}
               locationName={discount.location.name}
               startDate={discount.start_date}
@@ -269,7 +259,7 @@ const DiscountsPage = () => {
               isRedeemed={
                 user ? redeemedDiscountIds.has(discount.discount_id) : false
               }
-              discountId={discount.discount_id} // **WAŻNE: Przekazanie ID zniżki**
+              discountId={discount.discount_id}
               initialIsFavorite={
                 user ? favoriteDiscountIds.has(discount.discount_id) : false
               }
