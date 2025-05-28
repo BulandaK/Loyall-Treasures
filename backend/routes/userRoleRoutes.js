@@ -6,6 +6,13 @@ const adminMiddleware = require("../middleware/adminMiddleware");
 
 /**
  * @swagger
+ * tags:
+ *   name: User Role
+ *   description: Zarządzanie rolami użytkowników
+ */
+
+/**
+ * @swagger
  * /roles:
  *   get:
  *     summary: Pobierz wszystkie role użytkowników

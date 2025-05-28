@@ -6,6 +6,13 @@ const adminMiddleware = require("../middleware/adminMiddleware");
 
 /**
  * @swagger
+ * tags:
+ *   name: Discount Categories
+ *   description: Zarządzanie kategoriami zniżek
+ */
+
+/**
+ * @swagger
  * /categories:
  *   get:
  *     summary: Pobierz wszystkie kategorie zniżek

@@ -6,6 +6,13 @@ const adminMiddleware = require("../middleware/adminMiddleware");
 
 /**
  * @swagger
+ * tags:
+ *   name: locations
+ *   description: Zarządzanie lokalizacjami
+ */
+
+/**
+ * @swagger
  * /locations:
  *   get:
  *     summary: Pobierz wszystkie lokalizacje

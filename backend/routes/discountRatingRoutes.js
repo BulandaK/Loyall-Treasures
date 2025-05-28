@@ -4,6 +4,13 @@ const discountRatingController = require("../controllers/discountRatingControlle
 
 /**
  * @swagger
+ * tags:
+ *   name: Discount Ratings
+ *   description: Zarządzanie ocenami zniżek
+ */
+
+/**
+ * @swagger
  * /ratings/discounts/{discountId}:
  *   get:
  *     summary: Pobierz oceny dla zniżki
