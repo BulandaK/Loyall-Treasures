@@ -7,8 +7,8 @@ const adminMiddleware = require("../middleware/adminMiddleware");
 /**
  * @swagger
  * tags:
- *   name: Users
- *   description: Zarządzanie użytkownikami
+ *   - name: Users
+ *     description: Zarządzanie użytkownikami
  */
 
 /**
@@ -16,6 +16,7 @@ const adminMiddleware = require("../middleware/adminMiddleware");
  * /users:
  *   get:
  *     summary: Pobierz wszystkich użytkowników
+ *     tags: [Users]
  *     responses:
  *       200:
  *         description: Lista użytkowników
@@ -43,6 +44,7 @@ router.get("/", authMiddleware, adminMiddleware, userController.getAllUsers);
  * /users/{id}:
  *   get:
  *     summary: Pobierz użytkownika po ID
+ *     tags: [Users]
  *     parameters:
  *       - in: path
  *         name: id
@@ -77,6 +79,7 @@ router.get("/:id", authMiddleware, adminMiddleware, userController.getUserById);
  * /users:
  *   post:
  *     summary: Utwórz nowego użytkownika
+ *     tags: [Users]
  *     requestBody:
  *       required: true
  *       content:
@@ -117,6 +120,7 @@ router.post("/", userController.createUser);
  * /users/login:
  *   post:
  *     summary: Zaloguj użytkownika
+ *     tags: [Users]
  *     requestBody:
  *       required: true
  *       content:
@@ -151,6 +155,7 @@ router.post("/login", userController.loginUser);
  * /users/{id}:
  *   put:
  *     summary: Zaktualizuj dane użytkownika
+ *     tags: [Users]
  *     parameters:
  *       - in: path
  *         name: id
@@ -190,6 +195,7 @@ router.put("/:id", authMiddleware, userController.updateUser);
  * /users/{id}:
  *   delete:
  *     summary: Usuń użytkownika
+ *     tags: [Users]
  *     parameters:
  *       - in: path
  *         name: id

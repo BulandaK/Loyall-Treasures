@@ -7,8 +7,8 @@ const adminMiddleware = require("../middleware/adminMiddleware");
 /**
  * @swagger
  * tags:
- *   name: Discounts
- *   description: Zarządzanie zniżkami
+ *   - name: Discounts
+ *     description: Zarządzanie zniżkami
  */
 
 /**
@@ -16,6 +16,7 @@ const adminMiddleware = require("../middleware/adminMiddleware");
  * /discounts:
  *   get:
  *     summary: Pobierz wszystkie zniżki
+ *     tags: [Discounts]
  *     responses:
  *       200:
  *         description: Lista zniżek
@@ -65,6 +66,7 @@ router.get("/", discountController.getAllDiscounts);
  * /discounts/{id}:
  *   get:
  *     summary: Pobierz zniżkę po ID
+ *     tags: [Discounts]
  *     parameters:
  *       - in: path
  *         name: id
@@ -121,6 +123,7 @@ router.get("/:id", discountController.getDiscountById);
  * /discounts:
  *   post:
  *     summary: Utwórz nową zniżkę
+ *     tags: [Discounts]
  *     requestBody:
  *       required: true
  *       content:
@@ -174,6 +177,7 @@ router.post(
  * /discounts/{id}:
  *   put:
  *     summary: Zaktualizuj zniżkę
+ *     tags: [Discounts]
  *     parameters:
  *       - in: path
  *         name: id
@@ -234,6 +238,7 @@ router.put(
  * /discounts/{id}:
  *   delete:
  *     summary: Usuń zniżkę
+ *     tags: [Discounts]
  *     parameters:
  *       - in: path
  *         name: id

@@ -7,8 +7,8 @@ const adminMiddleware = require("../middleware/adminMiddleware");
 /**
  * @swagger
  * tags:
- *   name: User Role
- *   description: Zarządzanie rolami użytkowników
+ *   - name: User Role
+ *     description: Zarządzanie rolami użytkowników
  */
 
 /**
@@ -16,6 +16,7 @@ const adminMiddleware = require("../middleware/adminMiddleware");
  * /roles:
  *   get:
  *     summary: Pobierz wszystkie role użytkowników
+ *     tags: [User Role]
  *     responses:
  *       200:
  *         description: Lista ról użytkowników
@@ -40,6 +41,7 @@ router.get("/", userRoleController.getAllRoles);
  * /roles:
  *   post:
  *     summary: Utwórz nową rolę użytkownika
+ *     tags: [User Role]
  *     requestBody:
  *       required: true
  *       content:

@@ -7,8 +7,8 @@ const adminMiddleware = require("../middleware/adminMiddleware");
 /**
  * @swagger
  * tags:
- *   name: Discount Categories
- *   description: Zarządzanie kategoriami zniżek
+ *   - name: Discount Categories
+ *     description: Zarządzanie kategoriami zniżek
  */
 
 /**
@@ -16,6 +16,7 @@ const adminMiddleware = require("../middleware/adminMiddleware");
  * /categories:
  *   get:
  *     summary: Pobierz wszystkie kategorie zniżek
+ *     tags: [Discount Categories]
  *     responses:
  *       200:
  *         description: Lista kategorii zniżek
@@ -40,6 +41,7 @@ router.get("/", discountCategoryController.getAllCategories);
  * /categories:
  *   post:
  *     summary: Utwórz nową kategorię zniżek
+ *     tags: [Discount Categories]
  *     requestBody:
  *       required: true
  *       content:

@@ -5,8 +5,8 @@ const discountRatingController = require("../controllers/discountRatingControlle
 /**
  * @swagger
  * tags:
- *   name: Discount Ratings
- *   description: Zarządzanie ocenami zniżek
+ *   - name: Discount Ratings
+ *     description: Zarządzanie ocenami zniżek
  */
 
 /**
@@ -14,6 +14,7 @@ const discountRatingController = require("../controllers/discountRatingControlle
  * /ratings/discounts/{discountId}:
  *   get:
  *     summary: Pobierz oceny dla zniżki
+ *     tags: [Discount Ratings]
  *     parameters:
  *       - in: path
  *         name: discountId
@@ -58,6 +59,7 @@ router.get(
  * /ratings:
  *   post:
  *     summary: Dodaj ocenę dla zniżki
+ *     tags: [Discount Ratings]
  *     requestBody:
  *       required: true
  *       content:
@@ -108,6 +110,7 @@ router.post("/", discountRatingController.addRating);
  * /ratings/{id}:
  *   delete:
  *     summary: Usuń ocenę
+ *     tags: [Discount Ratings]
  *     parameters:
  *       - in: path
  *         name: id

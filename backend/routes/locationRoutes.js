@@ -7,8 +7,8 @@ const adminMiddleware = require("../middleware/adminMiddleware");
 /**
  * @swagger
  * tags:
- *   name: locations
- *   description: Zarządzanie lokalizacjami
+ *   - name: locations
+ *     description: Zarządzanie lokalizacjami
  */
 
 /**
@@ -16,6 +16,7 @@ const adminMiddleware = require("../middleware/adminMiddleware");
  * /locations:
  *   get:
  *     summary: Pobierz wszystkie lokalizacje
+ *     tags: [locations]
  *     responses:
  *       200:
  *         description: Lista lokalizacji
@@ -48,6 +49,7 @@ router.get(
  * /locations/{id}:
  *   get:
  *     summary: Pobierz lokalizację po ID
+ *     tags: [locations]
  *     parameters:
  *       - in: path
  *         name: id
@@ -87,6 +89,7 @@ router.get(
  * /locations:
  *   post:
  *     summary: Dodaj nową lokalizację
+ *     tags: [locations]
  *     requestBody:
  *       required: true
  *       content:
@@ -118,6 +121,7 @@ router.post(
  * /locations/{id}:
  *   put:
  *     summary: Zaktualizuj lokalizację
+ *     tags: [locations]
  *     parameters:
  *       - in: path
  *         name: id
@@ -156,6 +160,7 @@ router.put(
  * /locations/{id}:
  *   delete:
  *     summary: Usuń lokalizację
+ *     tags: [locations]
  *     parameters:
  *       - in: path
  *         name: id
