@@ -29,7 +29,6 @@ export default function LoginPage() {
       setFormData({ email: "", password: "" });
     } catch (error) {
       setMessage("Login failed. Please check your credentials.");
-      console.error("Login error:", error);
       setIsSuccess(false);
     }
   };

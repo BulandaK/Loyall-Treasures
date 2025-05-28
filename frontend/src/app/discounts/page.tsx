@@ -197,9 +197,10 @@ const DiscountsPage = () => {
 
   if (loading && discounts.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-100">
+      <div className="min-h-screen bg-gray-100 flex flex-col">
         <Navigation />
-        <div className="p-8">
+        <div className="flex-1 flex flex-col items-center justify-center p-8">
+          <div className="loader mb-4"></div>
           <div className="text-center text-xl font-semibold">Ładowanie...</div>
         </div>
       </div>
@@ -208,11 +209,11 @@ const DiscountsPage = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-100">
+      <div className="min-h-screen bg-gray-100 flex flex-col">
         <Navigation />
-        <div className="p-8">
+        <div className="flex-1 flex flex-col items-center justify-center p-8">
           <div className="text-center text-xl font-semibold text-red-500">
-            {error}
+            Nie udało się pobrać zniżek
           </div>
         </div>
       </div>
